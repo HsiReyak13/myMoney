@@ -1,6 +1,7 @@
 package com.example.mymoney.controller;
 
 import com.example.mymoney.model.FinancialMetrics;
+import com.example.mymoney.model.Transaction;
 import com.example.mymoney.service.AuthenticationService;
 import com.example.mymoney.service.DataService;
 import javafx.geometry.Insets;
@@ -14,8 +15,8 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 
 import java.time.YearMonth;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class DashboardController {
     private final AuthenticationService authService;
@@ -153,7 +154,9 @@ public class DashboardController {
 
     public void refresh() {
         String userId = authService.getCurrentUser().getId();
-        FinancialMetrics metrics = dataService.calculateMetrics(userId);
+        
+        // Use optimized metrics calculation with memoization
+        FinancialMetrics metrics = dataService.calculateMetricsOptimized(userId);
 
         // Update metric cards
         balanceValue.setText(metrics.getFormattedBalance());
@@ -165,8 +168,49 @@ public class DashboardController {
         expensesValue.setText(metrics.getFormattedExpenses());
         savingsValue.setText(metrics.getFormattedSavingsRate());
 
-        // Update trend chart
+        // Update trend chart with DSA optimizations
         updateTrendChart(userId);
+        
+        // Show DSA performance insights
+        showDSAInsights(userId);
+    }
+    
+    private void showDSAInsights(String userId) {
+        // Get all transactions for analysis
+        List<Transaction> allTransactions = dataService.getTransactionsForUser(userId);
+        
+        if (allTransactions.isEmpty()) return;
+        
+        // Demonstrate various DSA concepts
+        long startTime = System.nanoTime();
+        
+        // 1. Find maximum spending in a 7-day window using sliding window
+        double maxSpending = dataService.findMaxSpendingInWindow(allTransactions, 7);
+        
+        // 2. Get optimal budget allocation using dynamic programming
+        Map<String, Double> optimalBudget = dataService.optimalBudgetAllocation(allTransactions, 5000.0);
+        
+        // 3. Build spending pattern graph
+        Map<String, List<String>> spendingGraph = dataService.buildSpendingGraph(allTransactions);
+        
+        // 4. Get top spending categories using priority queue
+        List<Transaction> topExpenses = dataService.getTopNTransactionsByAmount(
+            allTransactions.stream()
+                .filter(t -> t.getType() == Transaction.TransactionType.EXPENSE)
+                .collect(java.util.stream.Collectors.toList()), 
+            3, true
+        );
+        
+        long endTime = System.nanoTime();
+        double analysisTime = (endTime - startTime) / 1_000_000.0;
+        
+        // Log DSA insights (in a real app, you might show this in a dedicated panel)
+        System.out.println("=== DSA FINANCIAL ANALYSIS ===");
+        System.out.println("Max 7-day spending: $" + String.format("%.2f", maxSpending));
+        System.out.println("Analysis time: " + String.format("%.3f", analysisTime) + " ms");
+        System.out.println("Spending pattern graph nodes: " + spendingGraph.size());
+        System.out.println("Top 3 expenses found using Priority Queue");
+        System.out.println("==========================================");
     }
 
     private void updateTrendChart(String userId) {
