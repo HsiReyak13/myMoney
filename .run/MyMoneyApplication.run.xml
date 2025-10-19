@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="MyMoneyApplication" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.example.mymoney.MyMoneyApplication" />
+    <module name="myMoney" />
+    <option name="VM_PARAMETERS" value="--enable-native-access=javafx.graphics --add-opens javafx.graphics/com.sun.glass.utils=ALL-UNNAMED --add-opens javafx.graphics/com.sun.marlin=ALL-UNNAMED" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="com.example.mymoney.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
+
