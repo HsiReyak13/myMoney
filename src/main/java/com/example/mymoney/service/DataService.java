@@ -12,7 +12,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.YearMonth;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class DataService {
     private static DataService instance;
@@ -48,6 +47,56 @@ public class DataService {
             System.out.println("✅ Transaction added: " + transaction.getCategory() + " - $" + transaction.getAmount());
         } catch (SQLException e) {
             System.err.println("❌ Failed to add transaction!");
+            e.printStackTrace();
+        }
+    }
+    
+    // ✅ New: Update existing transaction
+    public void updateTransaction(Transaction transaction) {
+        try {
+            String query = "UPDATE transactions SET type = ?, amount = ?, category = ?, notes = ?, transaction_date = ? WHERE id = ? AND user_id = ?";
+            PreparedStatement stmt = dbManager.getConnection().prepareStatement(query);
+            
+            stmt.setString(1, transaction.getType().name());
+            stmt.setDouble(2, transaction.getAmount());
+            stmt.setString(3, transaction.getCategory());
+            stmt.setString(4, transaction.getNotes());
+            stmt.setDate(5, java.sql.Date.valueOf(transaction.getDate()));
+            stmt.setString(6, transaction.getId());
+            stmt.setString(7, transaction.getUserId());
+            
+            int rowsUpdated = stmt.executeUpdate();
+            stmt.close();
+            
+            if (rowsUpdated > 0) {
+                System.out.println("✅ Transaction updated: " + transaction.getCategory() + " - $" + transaction.getAmount());
+            } else {
+                System.out.println("⚠️ No transaction updated (ID not found or permission denied)");
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Failed to update transaction!");
+            e.printStackTrace();
+        }
+    }
+    
+    // ✅ New: Delete transaction
+    public void deleteTransaction(String transactionId, String userId) {
+        try {
+            String query = "DELETE FROM transactions WHERE id = ? AND user_id = ?";
+            PreparedStatement stmt = dbManager.getConnection().prepareStatement(query);
+            stmt.setString(1, transactionId);
+            stmt.setString(2, userId);
+            
+            int rowsDeleted = stmt.executeUpdate();
+            stmt.close();
+            
+            if (rowsDeleted > 0) {
+                System.out.println("✅ Transaction deleted: " + transactionId);
+            } else {
+                System.out.println("⚠️ No transaction deleted (ID not found or permission denied)");
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Failed to delete transaction!");
             e.printStackTrace();
         }
     }
@@ -226,14 +275,37 @@ public class DataService {
             writer.write("Date,Type,Category,Amount,Notes\n");
             
             for (Transaction transaction : userTransactions) {
-                writer.write(String.format("%s,%s,%s,%.2f,\"%s\"\n",
+                // ✅ Fixed: Sanitize all fields to prevent CSV injection
+                String sanitizedCategory = sanitizeCSVField(transaction.getCategory());
+                String sanitizedNotes = sanitizeCSVField(transaction.getNotes());
+                
+                writer.write(String.format("\"%s\",\"%s\",\"%s\",%.2f,\"%s\"\n",
                         transaction.getFormattedDate(),
                         transaction.getType(),
-                        transaction.getCategory(),
+                        sanitizedCategory,
                         transaction.getAmount(),
-                        transaction.getNotes().replace("\"", "\"\"")));
+                        sanitizedNotes));
             }
         }
+    }
+    
+    // ✅ CSV Injection Prevention: Escape dangerous characters
+    private String sanitizeCSVField(String field) {
+        if (field == null) return "";
+        
+        // Escape double quotes by doubling them (RFC 4180)
+        String sanitized = field.replace("\"", "\"\"");
+        
+        // Prevent CSV injection by neutralizing formula characters
+        if (sanitized.length() > 0) {
+            char firstChar = sanitized.charAt(0);
+            if (firstChar == '=' || firstChar == '+' || firstChar == '-' || 
+                firstChar == '@' || firstChar == '\t' || firstChar == '\r') {
+                sanitized = "'" + sanitized; // Prefix with single quote to treat as text
+            }
+        }
+        
+        return sanitized;
     }
 
     public void clearAllData() {

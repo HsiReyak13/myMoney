@@ -14,18 +14,20 @@ import javafx.scene.Scene;
 
 import java.time.LocalDate;
 
-public class AddTransactionDialog {
+public class EditTransactionDialog {
     private final Stage dialog;
     private Transaction result = null;
     private final AuthenticationService authService;
+    private final Transaction existingTransaction;
 
-    public AddTransactionDialog(Stage owner) {
+    public EditTransactionDialog(Stage owner, Transaction transaction) {
         this.authService = AuthenticationService.getInstance();
+        this.existingTransaction = transaction;
         dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.initOwner(owner);
         dialog.initStyle(StageStyle.TRANSPARENT);
-        dialog.setTitle("Add Transaction");
+        dialog.setTitle("Edit Transaction");
 
         VBox root = createDialogContent();
         Scene scene = new Scene(root);
@@ -48,101 +50,81 @@ public class AddTransactionDialog {
         dialogBox.setMaxWidth(480);
         dialogBox.setPadding(new Insets(25));
 
-        // Header with close button
-        HBox header = new HBox();
-        header.setAlignment(Pos.CENTER_LEFT);
+        Text title = new Text("Edit Transaction");
+        title.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-fill: white;");
 
-        Text title = new Text("Add New Transaction");
-        title.getStyleClass().add("form-title");
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        Button closeButton = new Button("×");
-        closeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 24px; -fx-cursor: hand;");
-        closeButton.setOnAction(e -> dialog.close());
-
-        header.getChildren().addAll(title, spacer, closeButton);
-
-        // Type
+        // Type ComboBox
         Label typeLabel = new Label("Type");
-        typeLabel.getStyleClass().add("field-label");
-        typeLabel.setStyle("-fx-text-fill: white; -fx-font-size: 13px;");
+        typeLabel.getStyleClass().add("form-label");
         ComboBox<String> typeCombo = new ComboBox<>();
-        typeCombo.getItems().addAll("Expense", "Income");
-        typeCombo.setValue("Expense");
-        typeCombo.getStyleClass().add("combo-box");
-        typeCombo.setMaxWidth(Double.MAX_VALUE);
-        typeCombo.setPrefHeight(40);
+        typeCombo.getItems().addAll("Income", "Expense");
+        typeCombo.setValue(existingTransaction.getType() == Transaction.TransactionType.INCOME ? "Income" : "Expense");
+        typeCombo.setPrefWidth(430);
+        typeCombo.getStyleClass().add("form-input");
 
-        // Date
+        // Date Picker
         Label dateLabel = new Label("Date");
-        dateLabel.getStyleClass().add("field-label");
-        dateLabel.setStyle("-fx-text-fill: white; -fx-font-size: 13px;");
-        DatePicker datePicker = new DatePicker(LocalDate.now());
-        datePicker.getStyleClass().add("date-picker");
-        datePicker.setMaxWidth(Double.MAX_VALUE);
-        datePicker.setPrefHeight(40);
+        dateLabel.getStyleClass().add("form-label");
+        DatePicker datePicker = new DatePicker(existingTransaction.getDate());
+        datePicker.setPrefWidth(430);
+        datePicker.getStyleClass().add("form-input");
 
-        // Category
+        // Category ComboBox
         Label categoryLabel = new Label("Category");
-        categoryLabel.getStyleClass().add("field-label");
-        categoryLabel.setStyle("-fx-text-fill: white; -fx-font-size: 13px;");
+        categoryLabel.getStyleClass().add("form-label");
         ComboBox<String> categoryCombo = new ComboBox<>();
-        categoryCombo.getStyleClass().add("combo-box");
-        categoryCombo.setMaxWidth(Double.MAX_VALUE);
-        categoryCombo.setPrefHeight(40);
+        categoryCombo.setPrefWidth(430);
+        categoryCombo.getStyleClass().add("form-input");
+        categoryCombo.setValue(existingTransaction.getCategory());
 
         // Update categories based on type
         typeCombo.setOnAction(e -> {
             categoryCombo.getItems().clear();
             if (typeCombo.getValue().equals("Income")) {
-                categoryCombo.getItems().addAll("Salary", "Freelance", "Investment", "Gift", "Other Income");
+                categoryCombo.getItems().addAll("Salary", "Freelance", "Investment", "Business", "Gift", "Other Income");
             } else {
-                categoryCombo.getItems().addAll("Groceries", "Utilities", "Transportation", "Entertainment", "Healthcare", "Shopping", "Food", "Other Expense");
+                categoryCombo.getItems().addAll("Groceries", "Rent", "Utilities", "Transportation", "Entertainment", 
+                                                "Healthcare", "Shopping", "Dining", "Education", "Other Expense");
             }
-            if (!categoryCombo.getItems().isEmpty()) {
+            if (!categoryCombo.getItems().contains(existingTransaction.getCategory())) {
                 categoryCombo.setValue(categoryCombo.getItems().get(0));
             }
         });
 
         // Initialize categories
-        categoryCombo.getItems().addAll("Groceries", "Utilities", "Transportation", "Entertainment", "Healthcare", "Shopping", "Food", "Other Expense");
-        categoryCombo.setValue("Groceries");
+        if (typeCombo.getValue().equals("Income")) {
+            categoryCombo.getItems().addAll("Salary", "Freelance", "Investment", "Business", "Gift", "Other Income");
+        } else {
+            categoryCombo.getItems().addAll("Groceries", "Rent", "Utilities", "Transportation", "Entertainment", 
+                                            "Healthcare", "Shopping", "Dining", "Education", "Other Expense");
+        }
 
-        // Amount
+        // Amount Field
         Label amountLabel = new Label("Amount");
-        amountLabel.getStyleClass().add("field-label");
-        amountLabel.setStyle("-fx-text-fill: white; -fx-font-size: 13px;");
-        TextField amountField = new TextField();
-        amountField.setPromptText("0.00");
-        amountField.getStyleClass().add("text-field");
-        amountField.setPrefHeight(40);
+        amountLabel.getStyleClass().add("form-label");
+        TextField amountField = new TextField(String.valueOf(existingTransaction.getAmount()));
+        amountField.setPromptText("Enter amount");
+        amountField.setPrefWidth(430);
+        amountField.getStyleClass().add("form-input");
 
-        // Note
+        // Note Field
         Label noteLabel = new Label("Note");
-        noteLabel.getStyleClass().add("field-label");
-        noteLabel.setStyle("-fx-text-fill: white; -fx-font-size: 13px;");
-        TextField noteField = new TextField();
-        noteField.setPromptText("Add a note");
-        noteField.getStyleClass().add("text-field");
-        noteField.setPrefHeight(40);
+        noteLabel.getStyleClass().add("form-label");
+        TextArea noteField = new TextArea(existingTransaction.getNotes());
+        noteField.setPromptText("Enter optional note");
+        noteField.setPrefWidth(430);
+        noteField.setPrefHeight(100);
+        noteField.setWrapText(true);
+        noteField.getStyleClass().add("form-input");
 
-        // Error label
+        // Error Label
         Label errorLabel = new Label();
-        errorLabel.getStyleClass().add("error-label");
+        errorLabel.setStyle("-fx-text-fill: #e63946; -fx-font-size: 13px;");
         errorLabel.setVisible(false);
-        errorLabel.setWrapText(true);
-        errorLabel.setMaxWidth(Double.MAX_VALUE);
-
-        // Spacer before buttons
-        Region buttonSpacer = new Region();
-        buttonSpacer.setPrefHeight(5);
 
         // Buttons
         HBox buttonBox = new HBox(15);
         buttonBox.setAlignment(Pos.CENTER);
-        buttonBox.setPadding(new Insets(5, 0, 0, 0));
 
         Button cancelButton = new Button("Cancel");
         cancelButton.getStyleClass().add("secondary-button");
@@ -150,11 +132,11 @@ public class AddTransactionDialog {
         cancelButton.setPrefHeight(45);
         cancelButton.setOnAction(e -> dialog.close());
 
-        Button addButton = new Button("Add Transaction");
-        addButton.getStyleClass().add("primary-button");
-        addButton.setPrefWidth(200);
-        addButton.setPrefHeight(45);
-        addButton.setOnAction(e -> {
+        Button updateButton = new Button("Update Transaction");
+        updateButton.getStyleClass().add("primary-button");
+        updateButton.setPrefWidth(200);
+        updateButton.setPrefHeight(45);
+        updateButton.setOnAction(e -> {
             try {
                 String amountText = amountField.getText().trim();
                 if (amountText.isEmpty()) {
@@ -181,7 +163,6 @@ public class AddTransactionDialog {
                     return;
                 }
 
-                // ✅ Fixed: Validate date is selected
                 LocalDate date = datePicker.getValue();
                 if (date == null) {
                     errorLabel.setText("Please select a date");
@@ -191,7 +172,6 @@ public class AddTransactionDialog {
                 
                 String notes = noteField.getText().trim();
                 
-                // ✅ Enhanced: Limit notes length and sanitize
                 if (notes.length() > 500) {
                     errorLabel.setText("Notes must be 500 characters or less");
                     errorLabel.setVisible(true);
@@ -199,6 +179,7 @@ public class AddTransactionDialog {
                 }
 
                 result = new Transaction(
+                    existingTransaction.getId(), // Keep same ID
                     authService.getCurrentUser().getId(),
                     type,
                     amount,
@@ -214,17 +195,16 @@ public class AddTransactionDialog {
             }
         });
 
-        buttonBox.getChildren().addAll(cancelButton, addButton);
+        buttonBox.getChildren().addAll(cancelButton, updateButton);
 
         dialogBox.getChildren().addAll(
-            header,
+            title,
             typeLabel, typeCombo,
             dateLabel, datePicker,
             categoryLabel, categoryCombo,
             amountLabel, amountField,
             noteLabel, noteField,
             errorLabel,
-            buttonSpacer,
             buttonBox
         );
 

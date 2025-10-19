@@ -11,18 +11,23 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class AuthenticationService {
     private static AuthenticationService instance;
     private User currentUser;
     private final DatabaseManager dbManager;
+    private final Map<String, LoginAttempt> loginAttempts = new HashMap<>();
+    private static final int MAX_ATTEMPTS = 5;
+    private static final long LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
 
     private AuthenticationService() {
         this.dbManager = DatabaseManager.getInstance();
     }
 
-    public static AuthenticationService getInstance() {
+    public static synchronized AuthenticationService getInstance() {
         if (instance == null) {
             instance = new AuthenticationService();
         }
@@ -35,12 +40,14 @@ public class AuthenticationService {
             String checkQuery = "SELECT id FROM users WHERE username = ?";
             PreparedStatement checkStmt = dbManager.getConnection().prepareStatement(checkQuery);
             checkStmt.setString(1, username);
-            ResultSet rs = checkStmt.getResultSet();
+            ResultSet rs = checkStmt.executeQuery(); // ✅ Fixed: Now actually executes the query
             
-            if (rs != null && rs.next()) {
+            if (rs.next()) {
+                rs.close();
                 checkStmt.close();
                 return false; // User already exists
             }
+            rs.close();
             checkStmt.close();
 
             // Create new user
@@ -69,6 +76,12 @@ public class AuthenticationService {
     }
 
     public boolean login(String username, String password) {
+        // ✅ Enhanced: Check for account lockout
+        if (isAccountLocked(username)) {
+            System.out.println("❌ Account locked for: " + username);
+            return false;
+        }
+        
         try {
             String query = "SELECT id, username, password_hash, salt FROM users WHERE username = ?";
             PreparedStatement stmt = dbManager.getConnection().prepareStatement(query);
@@ -85,6 +98,7 @@ public class AuthenticationService {
                 
                 if (passwordHash.equals(dbPasswordHash)) {
                     currentUser = new User(id, dbUsername, dbPasswordHash, dbSalt);
+                    resetLoginAttempts(username); // ✅ Clear failed attempts on success
                     stmt.close();
                     System.out.println("✅ User logged in: " + username);
                     return true;
@@ -92,6 +106,7 @@ public class AuthenticationService {
             }
             
             stmt.close();
+            recordFailedLogin(username); // ✅ Track failed attempt
             System.out.println("❌ Login failed for: " + username);
             return false;
             
@@ -127,9 +142,70 @@ public class AuthenticationService {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             String saltedPassword = password + salt;
             byte[] hash = digest.digest(saltedPassword.getBytes(StandardCharsets.UTF_8));
+            
+            // ✅ Enhanced: Apply multiple iterations for better security (10,000 rounds)
+            for (int i = 0; i < 9999; i++) {
+                hash = digest.digest(hash);
+            }
+            
             return Base64.getEncoder().encodeToString(hash);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("SHA-256 algorithm not found", e);
+        }
+    }
+    
+    // ✅ Brute-force protection methods
+    private void recordFailedLogin(String username) {
+        LoginAttempt attempt = loginAttempts.getOrDefault(username, new LoginAttempt());
+        attempt.incrementAttempts();
+        loginAttempts.put(username, attempt);
+    }
+    
+    private void resetLoginAttempts(String username) {
+        loginAttempts.remove(username);
+    }
+    
+    private boolean isAccountLocked(String username) {
+        LoginAttempt attempt = loginAttempts.get(username);
+        if (attempt == null) return false;
+        
+        if (attempt.getAttempts() >= MAX_ATTEMPTS) {
+            long timeSinceLock = System.currentTimeMillis() - attempt.getFirstAttemptTime();
+            if (timeSinceLock < LOCKOUT_DURATION_MS) {
+                return true;
+            } else {
+                // Lockout expired, reset
+                loginAttempts.remove(username);
+                return false;
+            }
+        }
+        return false;
+    }
+    
+    public long getRemainingLockoutTime(String username) {
+        LoginAttempt attempt = loginAttempts.get(username);
+        if (attempt == null || attempt.getAttempts() < MAX_ATTEMPTS) return 0;
+        
+        long elapsed = System.currentTimeMillis() - attempt.getFirstAttemptTime();
+        long remaining = LOCKOUT_DURATION_MS - elapsed;
+        return remaining > 0 ? remaining / 1000 : 0; // Return seconds
+    }
+    
+    // Inner class for tracking login attempts
+    private static class LoginAttempt {
+        private int attempts = 0;
+        private long firstAttemptTime = System.currentTimeMillis();
+        
+        public void incrementAttempts() {
+            attempts++;
+        }
+        
+        public int getAttempts() {
+            return attempts;
+        }
+        
+        public long getFirstAttemptTime() {
+            return firstAttemptTime;
         }
     }
 }

@@ -118,9 +118,46 @@ public class TransactionsController {
         // Note column
         TableColumn<Transaction, String> noteColumn = new TableColumn<>("Note");
         noteColumn.setCellValueFactory(new PropertyValueFactory<>("notes"));
-        noteColumn.setPrefWidth(300);
+        noteColumn.setPrefWidth(250);
 
-        transactionTable.getColumns().addAll(dateColumn, categoryColumn, amountColumn, noteColumn);
+        // ✅ New: Actions column with Edit/Delete buttons
+        TableColumn<Transaction, Void> actionsColumn = new TableColumn<>("Actions");
+        actionsColumn.setPrefWidth(150);
+        actionsColumn.setCellFactory(column -> new TableCell<Transaction, Void>() {
+            private final Button editButton = new Button("Edit");
+            private final Button deleteButton = new Button("Delete");
+            private final HBox buttonsBox = new HBox(5, editButton, deleteButton);
+
+            {
+                editButton.getStyleClass().add("secondary-button");
+                editButton.setStyle("-fx-font-size: 11px; -fx-padding: 5 10;");
+                deleteButton.getStyleClass().add("secondary-button");
+                deleteButton.setStyle("-fx-font-size: 11px; -fx-padding: 5 10; -fx-background-color: #e63946;");
+                buttonsBox.setAlignment(Pos.CENTER);
+
+                editButton.setOnAction(e -> {
+                    Transaction transaction = getTableView().getItems().get(getIndex());
+                    showEditTransactionDialog(transaction);
+                });
+
+                deleteButton.setOnAction(e -> {
+                    Transaction transaction = getTableView().getItems().get(getIndex());
+                    showDeleteConfirmation(transaction);
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(buttonsBox);
+                }
+            }
+        });
+
+        transactionTable.getColumns().addAll(dateColumn, categoryColumn, amountColumn, noteColumn, actionsColumn);
 
         refreshTable();
 
@@ -180,5 +217,52 @@ public class TransactionsController {
     private void refreshTable() {
         String userId = authService.getCurrentUser().getId();
         transactionList.setAll(dataService.getTransactionsForUser(userId));
+    }
+    
+    // ✅ New: Show edit transaction dialog
+    private void showEditTransactionDialog(Transaction transaction) {
+        EditTransactionDialog dialog = new EditTransactionDialog(stage, transaction);
+        Transaction updatedTransaction = dialog.showAndWait();
+
+        if (updatedTransaction != null) {
+            dataService.updateTransaction(updatedTransaction);
+            refreshTable();
+            onTransactionChange.run();
+
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Success");
+            alert.setHeaderText(null);
+            alert.setContentText("Transaction updated successfully!");
+            alert.showAndWait();
+        }
+    }
+    
+    // ✅ New: Show delete confirmation dialog
+    private void showDeleteConfirmation(Transaction transaction) {
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Delete Transaction");
+        confirmAlert.setHeaderText("Are you sure you want to delete this transaction?");
+        confirmAlert.setContentText(
+            String.format("%s: %s - $%.2f\n%s", 
+                transaction.getFormattedDate(),
+                transaction.getCategory(),
+                transaction.getAmount(),
+                transaction.getNotes())
+        );
+
+        confirmAlert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                String userId = authService.getCurrentUser().getId();
+                dataService.deleteTransaction(transaction.getId(), userId);
+                refreshTable();
+                onTransactionChange.run();
+
+                Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+                successAlert.setTitle("Success");
+                successAlert.setHeaderText(null);
+                successAlert.setContentText("Transaction deleted successfully!");
+                successAlert.showAndWait();
+            }
+        });
     }
 }

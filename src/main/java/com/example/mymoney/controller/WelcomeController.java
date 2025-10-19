@@ -195,7 +195,14 @@ public class WelcomeController {
             if (authService.login(username, password)) {
                 openMainApplication();
             } else {
-                errorLabel.setText("Invalid username or password");
+                // ✅ Enhanced: Show lockout message if account is locked
+                long remainingSeconds = authService.getRemainingLockoutTime(username);
+                if (remainingSeconds > 0) {
+                    long minutes = remainingSeconds / 60;
+                    errorLabel.setText("Account locked. Try again in " + minutes + " minutes.");
+                } else {
+                    errorLabel.setText("Invalid username or password");
+                }
                 errorLabel.setVisible(true);
             }
         });
