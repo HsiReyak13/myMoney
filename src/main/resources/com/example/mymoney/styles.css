@@ -89,13 +89,6 @@
     -fx-fill: white;
 }
 
-.form-label {
-    -fx-text-fill: rgba(255, 255, 255, 0.9);
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
-    -fx-padding: 0 0 5 0;
-}
-
 .text-field {
     -fx-background-color: rgba(50, 50, 70, 0.6);
     -fx-text-fill: white;

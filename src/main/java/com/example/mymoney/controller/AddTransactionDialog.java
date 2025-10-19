@@ -181,22 +181,8 @@ public class AddTransactionDialog {
                     return;
                 }
 
-                // ✅ Fixed: Validate date is selected
                 LocalDate date = datePicker.getValue();
-                if (date == null) {
-                    errorLabel.setText("Please select a date");
-                    errorLabel.setVisible(true);
-                    return;
-                }
-                
                 String notes = noteField.getText().trim();
-                
-                // ✅ Enhanced: Limit notes length and sanitize
-                if (notes.length() > 500) {
-                    errorLabel.setText("Notes must be 500 characters or less");
-                    errorLabel.setVisible(true);
-                    return;
-                }
 
                 result = new Transaction(
                     authService.getCurrentUser().getId(),
