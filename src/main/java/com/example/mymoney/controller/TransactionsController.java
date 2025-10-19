@@ -81,34 +81,17 @@ public class TransactionsController {
         // Sort ComboBox
         ComboBox<String> sortCombo = new ComboBox<>();
         sortCombo.getItems().addAll(
-            "Sort by Date (Merge Sort)",
-            "Sort by Amount (Quick Sort)", 
-            "Sort by Category (Heap Sort)",
-            "Top 5 Highest (Priority Queue)",
-            "Top 5 Lowest (Priority Queue)"
+            "Sort by Date",
+            "Sort by Amount", 
+            "Sort by Category",
+            "Top 5 Highest",
+            "Top 5 Lowest"
         );
-        sortCombo.setPromptText("Choose Algorithm");
+        sortCombo.setPromptText("Sort transactions...");
         sortCombo.setPrefWidth(200);
         sortCombo.setOnAction(e -> applySorting(sortCombo.getValue()));
 
-        // Search Controls
-        TextField searchField = new TextField();
-        searchField.setPromptText("Search by category or amount...");
-        searchField.setPrefWidth(200);
-        searchField.setOnAction(e -> performSearch(searchField.getText()));
-
-        Button searchButton = new Button("Search");
-        searchButton.getStyleClass().add("secondary-button");
-        searchButton.setOnAction(e -> performSearch(searchField.getText()));
-
-        Button clearButton = new Button("Clear");
-        clearButton.getStyleClass().add("secondary-button");
-        clearButton.setOnAction(e -> {
-            searchField.clear();
-            refreshTable();
-        });
-
-        controls.getChildren().addAll(sortCombo, searchField, searchButton, clearButton);
+        controls.getChildren().addAll(sortCombo);
         return controls;
     }
 
@@ -234,100 +217,25 @@ public class TransactionsController {
         List<Transaction> transactions = dataService.getTransactionsForUser(userId);
         List<Transaction> sortedTransactions = new ArrayList<>();
         
-        long startTime = System.nanoTime();
-        
         switch (sortType) {
-            case "Sort by Date (Merge Sort)":
+            case "Sort by Date":
                 sortedTransactions = dataService.mergeSortByDate(transactions, false); // Descending
                 break;
-            case "Sort by Amount (Quick Sort)":
+            case "Sort by Amount":
                 sortedTransactions = dataService.quickSortByAmount(transactions, false); // Descending
                 break;
-            case "Sort by Category (Heap Sort)":
+            case "Sort by Category":
                 sortedTransactions = dataService.heapSortByCategory(transactions, true); // Ascending
                 break;
-            case "Top 5 Highest (Priority Queue)":
+            case "Top 5 Highest":
                 sortedTransactions = dataService.getTopNTransactionsByAmount(transactions, 5, true);
                 break;
-            case "Top 5 Lowest (Priority Queue)":
+            case "Top 5 Lowest":
                 sortedTransactions = dataService.getTopNTransactionsByAmount(transactions, 5, false);
                 break;
         }
         
-        long endTime = System.nanoTime();
-        double executionTime = (endTime - startTime) / 1_000_000.0; // Convert to milliseconds
-        
         transactionList.setAll(sortedTransactions);
-        
-        // Show algorithm performance info
-        showAlgorithmInfo(sortType, executionTime, sortedTransactions.size());
     }
     
-    private void performSearch(String searchTerm) {
-        if (searchTerm == null || searchTerm.trim().isEmpty()) {
-            refreshTable();
-            return;
-        }
-        
-        String userId = authService.getCurrentUser().getId();
-        List<Transaction> allTransactions = dataService.getTransactionsForUser(userId);
-        List<Transaction> searchResults = new ArrayList<>();
-        
-        long startTime = System.nanoTime();
-        
-        // Try to parse as number for amount search
-        try {
-            double amount = Double.parseDouble(searchTerm);
-            // Sort by amount first for binary search
-            List<Transaction> sortedByAmount = dataService.quickSortByAmount(allTransactions, true);
-            searchResults = dataService.binarySearchByAmount(sortedByAmount, amount, 0.01);
-        } catch (NumberFormatException e) {
-            // Search by category using linear search
-            searchResults = dataService.linearSearchByCategory(allTransactions, searchTerm);
-            
-            // Also search in notes using KMP pattern matching
-            List<Transaction> noteResults = dataService.searchInNotes(allTransactions, searchTerm);
-            searchResults.addAll(noteResults);
-            
-            // Remove duplicates
-            searchResults = searchResults.stream()
-                .distinct()
-                .collect(java.util.stream.Collectors.toList());
-        }
-        
-        long endTime = System.nanoTime();
-        double executionTime = (endTime - startTime) / 1_000_000.0;
-        
-        transactionList.setAll(searchResults);
-        
-        // Show search performance info
-        showSearchInfo(searchTerm, executionTime, searchResults.size());
-    }
-    
-    private void showAlgorithmInfo(String algorithm, double executionTime, int resultCount) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Algorithm Performance");
-        alert.setHeaderText(algorithm + " Completed");
-        alert.setContentText(String.format(
-            "Results: %d transactions\n" +
-            "Execution Time: %.3f ms\n" +
-            "Algorithm: %s",
-            resultCount, executionTime, algorithm
-        ));
-        alert.showAndWait();
-    }
-    
-    private void showSearchInfo(String searchTerm, double executionTime, int resultCount) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Search Results");
-        alert.setHeaderText("Search for: \"" + searchTerm + "\"");
-        alert.setContentText(String.format(
-            "Found: %d transactions\n" +
-            "Search Time: %.3f ms\n" +
-            "Algorithm: %s",
-            resultCount, executionTime, 
-            searchTerm.matches("\\d+(\\.\\d+)?") ? "Binary Search" : "Linear Search + KMP"
-        ));
-        alert.showAndWait();
-    }
 }

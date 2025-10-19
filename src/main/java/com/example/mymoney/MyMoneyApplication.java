@@ -7,7 +7,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-public class MyMoneyApplication extends Application {
+public class    MyMoneyApplication extends Application {
     @Override
     public void start(Stage stage) {
         stage.setTitle("MyMoney - Personal Finance Manager");

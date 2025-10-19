@@ -9,12 +9,9 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import javafx.collections.ObservableList;
-import javafx.collections.FXCollections;
 
 import java.time.YearMonth;
 import java.util.*;
@@ -25,10 +22,6 @@ public class ReportsController {
     private final DataService dataService;
     private final BudgetService budgetService;
     private final Stage stage;
-    
-    // DSA Performance tracking
-    private final Map<String, Long> algorithmPerformance = new HashMap<>();
-    private final Map<String, Integer> algorithmUsage = new HashMap<>();
 
     public ReportsController(Stage stage) {
         this.authService = AuthenticationService.getInstance();
@@ -42,25 +35,16 @@ public class ReportsController {
         content.setPadding(new Insets(30));
         content.setAlignment(Pos.TOP_CENTER);
 
-        Text title = new Text("Advanced Financial Reports & Analytics");
+        Text title = new Text("Financial Reports & Analytics");
         title.setStyle("-fx-font-size: 32px; -fx-font-weight: bold; -fx-fill: white;");
-
-        // DSA Controls Section
-        VBox dsaControlsSection = createDSAControlsSection();
 
         // Enhanced Charts section
         VBox chartsSection = createEnhancedChartsSection();
 
-        // DSA Analytics section
-        VBox dsaAnalyticsSection = createDSAAnalyticsSection();
-
-        // Financial insights with DSA
+        // Financial insights
         VBox insightsSection = createEnhancedFinancialInsights();
 
-        // Performance metrics
-        VBox performanceSection = createPerformanceMetricsSection();
-
-        content.getChildren().addAll(title, dsaControlsSection, chartsSection, dsaAnalyticsSection, insightsSection, performanceSection);
+        content.getChildren().addAll(title, chartsSection, insightsSection);
 
         ScrollPane scrollPane = new ScrollPane(content);
         scrollPane.setFitToWidth(true);
@@ -69,46 +53,6 @@ public class ReportsController {
         return scrollPane;
     }
 
-    // ==================== DSA CONTROLS SECTION ====================
-    
-    private VBox createDSAControlsSection() {
-        VBox section = new VBox(20);
-        section.setMaxWidth(1400);
-        section.setPadding(new Insets(25));
-        section.setStyle("-fx-background-color: rgba(255, 255, 255, 0.05); -fx-background-radius: 15;");
-
-        Text title = new Text("DSA Analytics Controls");
-        title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-fill: white;");
-
-        HBox controls = new HBox(20);
-        controls.setAlignment(Pos.CENTER);
-
-        // Analysis Type ComboBox
-        ComboBox<String> analysisType = new ComboBox<>();
-        analysisType.getItems().addAll(
-            "Spending Pattern Analysis (Graph BFS)",
-            "Budget Optimization (Dynamic Programming)",
-            "Top Transactions (Priority Queue)",
-            "Category Clustering (K-Means Simulation)",
-            "Trend Analysis (Sliding Window)",
-            "Anomaly Detection (Statistical Analysis)"
-        );
-        analysisType.setPromptText("Choose Analysis Type");
-        analysisType.setPrefWidth(300);
-
-        Button runAnalysis = new Button("Run DSA Analysis");
-        runAnalysis.getStyleClass().add("primary-button");
-        runAnalysis.setOnAction(e -> runDSAAnalysis(analysisType.getValue()));
-
-        Button clearCache = new Button("Clear Cache");
-        clearCache.getStyleClass().add("secondary-button");
-        clearCache.setOnAction(e -> clearCaches());
-
-        controls.getChildren().addAll(analysisType, runAnalysis, clearCache);
-        section.getChildren().addAll(title, controls);
-
-        return section;
-    }
 
     // ==================== ENHANCED CHARTS SECTION ====================
     
@@ -155,7 +99,7 @@ public class ReportsController {
         box.setStyle("-fx-background-color: rgba(255, 255, 255, 0.05); -fx-background-radius: 15;");
         box.setPrefWidth(600);
 
-        Text title = new Text("Spending by Category (DSA Optimized)");
+        Text title = new Text("Spending by Category");
         title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-fill: white;");
 
         PieChart pieChart = new PieChart();
@@ -166,11 +110,8 @@ public class ReportsController {
 
         String userId = authService.getCurrentUser().getId();
         
-        // Use DSA-optimized data retrieval
-        long startTime = System.nanoTime();
+        // Get category spending data
         Map<String, Double> categorySpending = dataService.getCategorySpending(userId);
-        long endTime = System.nanoTime();
-        trackAlgorithmPerformance("Category Spending Retrieval", endTime - startTime);
 
         if (categorySpending.isEmpty()) {
             Label noDataLabel = new Label("No expense data available");
@@ -254,7 +195,7 @@ public class ReportsController {
         box.setStyle("-fx-background-color: rgba(255, 255, 255, 0.05); -fx-background-radius: 15;");
         box.setPrefWidth(600);
 
-        Text title = new Text("Enhanced Balance & Expenses Trend");
+        Text title = new Text("Balance & Expenses Trend");
         title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-fill: white;");
 
         // Create axes
@@ -284,12 +225,9 @@ public class ReportsController {
 
         String userId = authService.getCurrentUser().getId();
         
-        // Use DSA-optimized data retrieval
-        long startTime = System.nanoTime();
+        // Get monthly data
         Map<YearMonth, Double> monthlyIncome = dataService.getMonthlyIncome(userId);
         Map<YearMonth, Double> monthlyExpenses = dataService.getMonthlyExpenses(userId);
-        long endTime = System.nanoTime();
-        trackAlgorithmPerformance("Monthly Data Retrieval", endTime - startTime);
 
         XYChart.Series<Number, Number> balanceSeries = new XYChart.Series<>();
         balanceSeries.setName("Balance");
@@ -393,120 +331,6 @@ public class ReportsController {
         return box;
     }
 
-    // ==================== DSA ANALYTICS SECTION ====================
-    
-    private VBox createDSAAnalyticsSection() {
-        VBox section = new VBox(20);
-        section.setMaxWidth(1400);
-        section.setPadding(new Insets(25));
-        section.setStyle("-fx-background-color: rgba(255, 255, 255, 0.05); -fx-background-radius: 15;");
-
-        Text sectionTitle = new Text("DSA-Powered Analytics");
-        sectionTitle.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-fill: white;");
-
-        String userId = authService.getCurrentUser().getId();
-        List<Transaction> transactions = dataService.getTransactionsForUser(userId);
-
-        // Create analytics table
-        TableView<Map<String, Object>> analyticsTable = createAnalyticsTable();
-        populateAnalyticsTable(analyticsTable, transactions);
-
-        section.getChildren().addAll(sectionTitle, analyticsTable);
-        return section;
-    }
-    
-    private TableView<Map<String, Object>> createAnalyticsTable() {
-        TableView<Map<String, Object>> table = new TableView<>();
-        table.setPrefHeight(300);
-        table.setStyle("-fx-background-color: transparent;");
-
-        TableColumn<Map<String, Object>, String> algorithmCol = new TableColumn<>("Algorithm");
-        algorithmCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
-            data.getValue().get("algorithm").toString()));
-        algorithmCol.setPrefWidth(200);
-
-        TableColumn<Map<String, Object>, String> resultCol = new TableColumn<>("Result");
-        resultCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
-            data.getValue().get("result").toString()));
-        resultCol.setPrefWidth(300);
-
-        TableColumn<Map<String, Object>, String> performanceCol = new TableColumn<>("Performance");
-        performanceCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
-            data.getValue().get("performance").toString()));
-        performanceCol.setPrefWidth(150);
-
-        TableColumn<Map<String, Object>, String> complexityCol = new TableColumn<>("Complexity");
-        complexityCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
-            data.getValue().get("complexity").toString()));
-        complexityCol.setPrefWidth(100);
-
-        table.getColumns().addAll(algorithmCol, resultCol, performanceCol, complexityCol);
-        return table;
-    }
-    
-    private void populateAnalyticsTable(TableView<Map<String, Object>> table, List<Transaction> transactions) {
-        ObservableList<Map<String, Object>> data = FXCollections.observableArrayList();
-        
-        if (transactions.isEmpty()) {
-            Map<String, Object> noData = new HashMap<>();
-            noData.put("algorithm", "No Data");
-            noData.put("result", "No transactions available");
-            noData.put("performance", "N/A");
-            noData.put("complexity", "N/A");
-            data.add(noData);
-        } else {
-            // Top 5 transactions using Priority Queue
-            long startTime = System.nanoTime();
-            List<Transaction> topTransactions = dataService.getTopNTransactionsByAmount(transactions, 5, true);
-            long endTime = System.nanoTime();
-            
-            Map<String, Object> topTransactionsResult = new HashMap<>();
-            topTransactionsResult.put("algorithm", "Priority Queue (Top K)");
-            topTransactionsResult.put("result", "Top 5 transactions: " + 
-                topTransactions.stream().map(t -> t.getCategory()).collect(Collectors.joining(", ")));
-            topTransactionsResult.put("performance", String.format("%.3f ms", (endTime - startTime) / 1_000_000.0));
-            topTransactionsResult.put("complexity", "O(n log k)");
-            data.add(topTransactionsResult);
-            
-            // Spending pattern analysis using Graph BFS
-            startTime = System.nanoTime();
-            Map<String, List<String>> spendingGraph = dataService.buildSpendingGraph(transactions);
-            endTime = System.nanoTime();
-            
-            Map<String, Object> graphResult = new HashMap<>();
-            graphResult.put("algorithm", "Graph BFS Analysis");
-            graphResult.put("result", "Spending patterns: " + spendingGraph.size() + " connected categories");
-            graphResult.put("performance", String.format("%.3f ms", (endTime - startTime) / 1_000_000.0));
-            graphResult.put("complexity", "O(V + E)");
-            data.add(graphResult);
-            
-            // Sliding window analysis
-            startTime = System.nanoTime();
-            double maxSpending = dataService.findMaxSpendingInWindow(transactions, 7);
-            endTime = System.nanoTime();
-            
-            Map<String, Object> slidingWindowResult = new HashMap<>();
-            slidingWindowResult.put("algorithm", "Sliding Window");
-            slidingWindowResult.put("result", "Max 7-day spending: $" + String.format("%.2f", maxSpending));
-            slidingWindowResult.put("performance", String.format("%.3f ms", (endTime - startTime) / 1_000_000.0));
-            slidingWindowResult.put("complexity", "O(n)");
-            data.add(slidingWindowResult);
-            
-            // Dynamic Programming budget optimization
-            startTime = System.nanoTime();
-            Map<String, Double> optimalBudget = dataService.optimalBudgetAllocation(transactions, 5000.0);
-            endTime = System.nanoTime();
-            
-            Map<String, Object> dpResult = new HashMap<>();
-            dpResult.put("algorithm", "Dynamic Programming");
-            dpResult.put("result", "Optimal budget allocation for " + optimalBudget.size() + " categories");
-            dpResult.put("performance", String.format("%.3f ms", (endTime - startTime) / 1_000_000.0));
-            dpResult.put("complexity", "O(n * W)");
-            data.add(dpResult);
-        }
-        
-        table.setItems(data);
-    }
 
     // ==================== ENHANCED FINANCIAL INSIGHTS ====================
     
@@ -516,7 +340,7 @@ public class ReportsController {
         section.setPadding(new Insets(25));
         section.setStyle("-fx-background-color: rgba(255, 255, 255, 0.05); -fx-background-radius: 15;");
 
-        Text sectionTitle = new Text("Enhanced Financial Insights (DSA-Powered)");
+        Text sectionTitle = new Text("Financial Insights");
         sectionTitle.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-fill: white;");
 
         String userId = authService.getCurrentUser().getId();
@@ -528,40 +352,36 @@ public class ReportsController {
         insights.setVgap(20);
         insights.setAlignment(Pos.CENTER);
 
-        // Highest Expense Category (using Priority Queue concept)
-        VBox highestExpense = createEnhancedInsightCard(
+        // Highest Expense Category
+        VBox highestExpense = createInsightCard(
             "Highest Expense Category",
             getHighestCategory(categorySpending),
             String.format("$%.2f", getHighestAmount(categorySpending)),
-            "#06ffa5",
-            "Priority Queue Analysis"
+            "#06ffa5"
         );
 
-        // Growth Rate with DSA calculation
-        VBox growthRate = createEnhancedInsightCard(
+        // Growth Rate Analysis
+        VBox growthRate = createInsightCard(
             "Growth Rate Analysis",
             "Balance Trend",
             calculateGrowthRate(userId),
-            "#06ffa5",
-            "Sliding Window Algorithm"
+            "#06ffa5"
         );
 
         // Budget Optimization
-        VBox budgetOptimization = createEnhancedInsightCard(
+        VBox budgetOptimization = createInsightCard(
             "Budget Optimization",
-            "DP Recommendation",
+            "Recommendation",
             getBudgetOptimizationStatus(userId),
-            "#f4a261",
-            "Dynamic Programming"
+            "#f4a261"
         );
 
         // Spending Pattern
-        VBox spendingPattern = createEnhancedInsightCard(
+        VBox spendingPattern = createInsightCard(
             "Spending Pattern",
-            "Graph Analysis",
+            "Analysis",
             getSpendingPatternInsight(userId),
-            "#9775fa",
-            "Graph BFS Algorithm"
+            "#9775fa"
         );
 
         insights.add(highestExpense, 0, 0);
@@ -573,64 +393,9 @@ public class ReportsController {
         return section;
     }
 
-    // ==================== PERFORMANCE METRICS SECTION ====================
-    
-    private VBox createPerformanceMetricsSection() {
-        VBox section = new VBox(20);
-        section.setMaxWidth(1400);
-        section.setPadding(new Insets(25));
-        section.setStyle("-fx-background-color: rgba(255, 255, 255, 0.05); -fx-background-radius: 15;");
-
-        Text sectionTitle = new Text("Algorithm Performance Metrics");
-        sectionTitle.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-fill: white;");
-
-        // Performance summary
-        VBox performanceSummary = createPerformanceSummary();
-        section.getChildren().addAll(sectionTitle, performanceSummary);
-
-        return section;
-    }
-    
-    private VBox createPerformanceSummary() {
-        VBox summary = new VBox(15);
-        
-        // Algorithm usage statistics
-        HBox usageStats = new HBox(30);
-        usageStats.setAlignment(Pos.CENTER);
-        
-        VBox totalAlgorithms = new VBox(5);
-        totalAlgorithms.setAlignment(Pos.CENTER);
-        Label totalLabel = new Label("Total Algorithms Used");
-        totalLabel.setStyle("-fx-text-fill: #a8dadc; -fx-font-size: 12px;");
-        Label totalValue = new Label(String.valueOf(algorithmUsage.size()));
-        totalValue.setStyle("-fx-text-fill: white; -fx-font-size: 24px; -fx-font-weight: bold;");
-        totalAlgorithms.getChildren().addAll(totalLabel, totalValue);
-        
-        VBox avgPerformance = new VBox(5);
-        avgPerformance.setAlignment(Pos.CENTER);
-        Label avgLabel = new Label("Average Performance");
-        avgLabel.setStyle("-fx-text-fill: #a8dadc; -fx-font-size: 12px;");
-        double avgTime = algorithmPerformance.values().stream().mapToLong(Long::longValue).average().orElse(0.0);
-        Label avgValue = new Label(String.format("%.3f ms", avgTime / 1_000_000.0));
-        avgValue.setStyle("-fx-text-fill: #06ffa5; -fx-font-size: 24px; -fx-font-weight: bold;");
-        avgPerformance.getChildren().addAll(avgLabel, avgValue);
-        
-        VBox cacheHitRate = new VBox(5);
-        cacheHitRate.setAlignment(Pos.CENTER);
-        Label cacheLabel = new Label("Cache Efficiency");
-        cacheLabel.setStyle("-fx-text-fill: #a8dadc; -fx-font-size: 12px;");
-        Label cacheValue = new Label("85%");
-        cacheValue.setStyle("-fx-text-fill: #f4a261; -fx-font-size: 24px; -fx-font-weight: bold;");
-        cacheHitRate.getChildren().addAll(cacheLabel, cacheValue);
-        
-        usageStats.getChildren().addAll(totalAlgorithms, avgPerformance, cacheHitRate);
-        summary.getChildren().add(usageStats);
-        
-        return summary;
-    }
 
     // ==================== HELPER METHODS ====================
-    
+
     private VBox createInsightCard(String title, String label, String value, String valueColor) {
         VBox card = new VBox(10);
         card.setAlignment(Pos.CENTER);
@@ -649,26 +414,6 @@ public class ReportsController {
         return card;
     }
     
-    private VBox createEnhancedInsightCard(String title, String label, String value, String valueColor, String algorithm) {
-        VBox card = new VBox(10);
-        card.setAlignment(Pos.CENTER);
-        card.setPrefWidth(280);
-
-        Label titleLabel = new Label(title);
-        titleLabel.setStyle("-fx-text-fill: #a8dadc; -fx-font-size: 13px;");
-
-        Label mainLabel = new Label(label);
-        mainLabel.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;");
-
-        Label valueLabel = new Label(value);
-        valueLabel.setStyle("-fx-text-fill: " + valueColor + "; -fx-font-size: 20px; -fx-font-weight: bold;");
-        
-        Label algorithmLabel = new Label(algorithm);
-        algorithmLabel.setStyle("-fx-text-fill: #9775fa; -fx-font-size: 11px; -fx-font-style: italic;");
-
-        card.getChildren().addAll(titleLabel, mainLabel, valueLabel, algorithmLabel);
-        return card;
-    }
     
     private VBox createEnhancedLegend(List<Map.Entry<String, Double>> sortedCategories, double total) {
         VBox legend = new VBox(10);
@@ -791,100 +536,7 @@ public class ReportsController {
         return spendingGraph.size() + " connected patterns";
     }
     
-    private void trackAlgorithmPerformance(String algorithm, long executionTime) {
-        algorithmPerformance.put(algorithm, executionTime);
-        algorithmUsage.put(algorithm, algorithmUsage.getOrDefault(algorithm, 0) + 1);
-    }
     
-    private void runDSAAnalysis(String analysisType) {
-        if (analysisType == null) return;
-        
-        String userId = authService.getCurrentUser().getId();
-        List<Transaction> transactions = dataService.getTransactionsForUser(userId);
-        
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("DSA Analysis Results");
-        alert.setHeaderText(analysisType);
-        
-        long startTime = System.nanoTime();
-        String result = performDSAAnalysis(analysisType, transactions);
-        long endTime = System.nanoTime();
-        
-        double executionTime = (endTime - startTime) / 1_000_000.0;
-        trackAlgorithmPerformance(analysisType, endTime - startTime);
-        
-        alert.setContentText(String.format(
-            "Analysis: %s\n\nResult: %s\n\nExecution Time: %.3f ms",
-            analysisType, result, executionTime
-        ));
-        alert.showAndWait();
-    }
-    
-    private String performDSAAnalysis(String analysisType, List<Transaction> transactions) {
-        switch (analysisType) {
-            case "Spending Pattern Analysis (Graph BFS)":
-                Map<String, List<String>> graph = dataService.buildSpendingGraph(transactions);
-                return "Found " + graph.size() + " spending pattern connections";
-                
-            case "Budget Optimization (Dynamic Programming)":
-                Map<String, Double> optimal = dataService.optimalBudgetAllocation(transactions, 5000.0);
-                return "Optimized budget for " + optimal.size() + " categories";
-                
-            case "Top Transactions (Priority Queue)":
-                List<Transaction> top = dataService.getTopNTransactionsByAmount(transactions, 5, true);
-                return "Top 5 transactions identified using Priority Queue";
-                
-            case "Category Clustering (K-Means Simulation)":
-                Map<String, Double> categories = dataService.getCategorySpending(authService.getCurrentUser().getId());
-                return "Clustered " + categories.size() + " spending categories";
-                
-            case "Trend Analysis (Sliding Window)":
-                double maxSpending = dataService.findMaxSpendingInWindow(transactions, 7);
-                return "Max 7-day spending: $" + String.format("%.2f", maxSpending);
-                
-            case "Anomaly Detection (Statistical Analysis)":
-                return "Detected " + detectAnomalies(transactions) + " spending anomalies";
-                
-            default:
-                return "Analysis not implemented";
-        }
-    }
-    
-    private int detectAnomalies(List<Transaction> transactions) {
-        if (transactions.size() < 3) return 0;
-        
-        // Simple anomaly detection using statistical analysis
-        List<Double> amounts = transactions.stream()
-            .map(Transaction::getAmount)
-            .collect(Collectors.toList());
-        
-        double mean = amounts.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
-        double variance = amounts.stream()
-            .mapToDouble(x -> Math.pow(x - mean, 2))
-            .average().orElse(0.0);
-        double stdDev = Math.sqrt(variance);
-        
-        int anomalies = 0;
-        for (double amount : amounts) {
-            if (Math.abs(amount - mean) > 2 * stdDev) {
-                anomalies++;
-            }
-        }
-        
-        return anomalies;
-    }
-    
-    private void clearCaches() {
-        dataService.clearMetricsCache();
-        algorithmPerformance.clear();
-        algorithmUsage.clear();
-        
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Cache Cleared");
-        alert.setHeaderText(null);
-        alert.setContentText("All caches and performance metrics have been cleared.");
-        alert.showAndWait();
-    }
 
     private String getHighestCategory(Map<String, Double> categorySpending) {
         return categorySpending.entrySet().stream()
