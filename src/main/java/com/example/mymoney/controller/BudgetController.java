@@ -35,10 +35,8 @@ public class BudgetController {
         Text title = new Text("Budget Management");
         title.setStyle("-fx-font-size: 32px; -fx-font-weight: bold; -fx-fill: white;");
 
-        // Overall budget section
         VBox overallSection = createOverallBudgetSection();
 
-        // Category budgets
         VBox categorySection = createCategoryBudgetsSection();
 
         content.getChildren().addAll(title, overallSection, categorySection);
@@ -75,7 +73,6 @@ public class BudgetController {
 
         budgetInput.getChildren().addAll(overallBudgetField, updateButton);
 
-        // Total spent this month
         VBox spentSection = new VBox(10);
         spentSection.setPadding(new Insets(15, 0, 0, 0));
 
@@ -118,7 +115,6 @@ public class BudgetController {
         categoryGrid.setHgap(20);
         categoryGrid.setVgap(20);
 
-        // Configure grid columns
         for (int i = 0; i < 2; i++) {
             ColumnConstraints col = new ColumnConstraints();
             col.setPercentWidth(50);
@@ -135,7 +131,6 @@ public class BudgetController {
         card.getStyleClass().add("metric-card");
         card.setPadding(new Insets(20));
 
-        // Header
         HBox header = new HBox();
         header.setAlignment(Pos.CENTER_LEFT);
 
@@ -153,11 +148,9 @@ public class BudgetController {
 
         header.getChildren().addAll(categoryLabel, spacer1, percentLabel);
 
-        // Amount
         Label amountLabel = new Label(String.format("$%.0f / $%.0f", spent, budget));
         amountLabel.setStyle("-fx-text-fill: #a8dadc; -fx-font-size: 14px;");
 
-        // Progress bar
         ProgressBar progressBar = new ProgressBar(budget > 0 ? Math.min(spent / budget, 1.0) : 0);
         progressBar.setMaxWidth(Double.MAX_VALUE);
         progressBar.setPrefHeight(10);
@@ -168,7 +161,6 @@ public class BudgetController {
             "-fx-control-inner-background: rgba(255, 255, 255, 0.1);"
         );
 
-        // Budget input
         HBox budgetInput = new HBox(10);
         budgetInput.setAlignment(Pos.CENTER_LEFT);
 
@@ -239,7 +231,6 @@ public class BudgetController {
         Map<String, Double> currentMonthSpending = dataService.getCurrentMonthSpending(userId);
         double totalSpent = dataService.getCurrentMonthTotalExpenses(userId);
 
-        // Update overall budget
         overallBudgetField.setText(String.format("%.0f", budget.getOverallMonthlyBudget()));
         totalSpentLabel.setText(String.format("$%.0f / $%.0f", totalSpent, budget.getOverallMonthlyBudget()));
         
@@ -259,7 +250,6 @@ public class BudgetController {
             percentLabel.setText(String.format("%.1f%% of budget used", overallPercent * 100));
         }
 
-        // Update category budgets
         categoryGrid.getChildren().clear();
         String[] categories = {"Groceries", "Utilities", "Transportation", "Entertainment", "Healthcare", "Shopping"};
         

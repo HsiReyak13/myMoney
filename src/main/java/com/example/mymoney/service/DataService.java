@@ -47,7 +47,6 @@ public class DataService {
             stmt.executeUpdate();
             stmt.close();
             
-            System.out.println("✅ Transaction added: " + transaction.getCategory() + " - $" + transaction.getAmount());
         } catch (SQLException e) {
             System.err.println("❌ Failed to add transaction!");
             e.printStackTrace();
@@ -244,20 +243,17 @@ public class DataService {
             Statement stmt = dbManager.getConnection().createStatement();
             stmt.executeUpdate(query);
             stmt.close();
-            System.out.println("✅ All transactions cleared");
         } catch (SQLException e) {
             System.err.println("❌ Failed to clear transactions!");
             e.printStackTrace();
         }
     }
 
-    // ==================== DSA CONCEPTS IMPLEMENTATION ====================
     
     /**
      * SORTING ALGORITHMS - Different sorting strategies for transactions
      */
     
-    // Quick Sort implementation for transactions by amount
     public List<Transaction> quickSortByAmount(List<Transaction> transactions, boolean ascending) {
         if (transactions == null || transactions.size() <= 1) {
             return new ArrayList<>(transactions);
@@ -294,7 +290,6 @@ public class DataService {
         return i + 1;
     }
     
-    // Merge Sort implementation for transactions by date
     public List<Transaction> mergeSortByDate(List<Transaction> transactions, boolean ascending) {
         if (transactions == null || transactions.size() <= 1) {
             return new ArrayList<>(transactions);
@@ -357,7 +352,6 @@ public class DataService {
         }
     }
     
-    // Heap Sort implementation for transactions by category
     public List<Transaction> heapSortByCategory(List<Transaction> transactions, boolean ascending) {
         if (transactions == null || transactions.size() <= 1) {
             return new ArrayList<>(transactions);
@@ -366,12 +360,10 @@ public class DataService {
         List<Transaction> result = new ArrayList<>(transactions);
         int n = result.size();
         
-        // Build heap
         for (int i = n / 2 - 1; i >= 0; i--) {
             heapifyByCategory(result, n, i, ascending);
         }
         
-        // Extract elements from heap one by one
         for (int i = n - 1; i > 0; i--) {
             swap(result, 0, i);
             heapifyByCategory(result, i, 0, ascending);
@@ -419,7 +411,6 @@ public class DataService {
      * SEARCH ALGORITHMS - Efficient searching strategies
      */
     
-    // Binary Search for finding transactions by amount (requires sorted list)
     public List<Transaction> binarySearchByAmount(List<Transaction> sortedTransactions, double targetAmount, double tolerance) {
         List<Transaction> results = new ArrayList<>();
         binarySearchByAmountHelper(sortedTransactions, targetAmount, tolerance, 0, sortedTransactions.size() - 1, results);
@@ -435,7 +426,6 @@ public class DataService {
             if (Math.abs(currentAmount - target) <= tolerance) {
                 results.add(transactions.get(mid));
                 
-                // Search for duplicates in both directions
                 int leftDup = mid - 1;
                 while (leftDup >= 0 && Math.abs(transactions.get(leftDup).getAmount() - target) <= tolerance) {
                     results.add(transactions.get(leftDup));
@@ -455,7 +445,6 @@ public class DataService {
         }
     }
     
-    // Linear Search with early termination for category search
     public List<Transaction> linearSearchByCategory(List<Transaction> transactions, String category) {
         List<Transaction> results = new ArrayList<>();
         for (Transaction transaction : transactions) {
@@ -466,7 +455,6 @@ public class DataService {
         return results;
     }
     
-    // KMP Pattern Matching for searching in transaction notes
     public List<Transaction> searchInNotes(List<Transaction> transactions, String pattern) {
         List<Transaction> results = new ArrayList<>();
         int[] lps = computeLPSArray(pattern);
@@ -528,7 +516,6 @@ public class DataService {
      * ADVANCED DATA STRUCTURES
      */
     
-    // Priority Queue for getting top N transactions by amount
     public List<Transaction> getTopNTransactionsByAmount(List<Transaction> transactions, int n, boolean highest) {
         if (transactions == null || transactions.isEmpty()) {
             return new ArrayList<>();
@@ -559,7 +546,6 @@ public class DataService {
         return result;
     }
     
-    // Trie data structure for efficient category prefix search
     public List<String> searchCategoriesByPrefix(List<Transaction> transactions, String prefix) {
         Set<String> categories = transactions.stream()
             .map(Transaction::getCategory)
@@ -571,11 +557,9 @@ public class DataService {
             .collect(Collectors.toList());
     }
     
-    // Graph representation for spending patterns (using adjacency list)
     public Map<String, List<String>> buildSpendingGraph(List<Transaction> transactions) {
         Map<String, List<String>> graph = new HashMap<>();
         
-        // Group transactions by date and find patterns
         Map<String, List<Transaction>> dailyTransactions = transactions.stream()
             .collect(Collectors.groupingBy(t -> t.getDate().toString()));
             
@@ -598,7 +582,6 @@ public class DataService {
      * ALGORITHM OPTIMIZATIONS
      */
     
-    // Memoization for expensive calculations
     private final Map<String, FinancialMetrics> metricsCache = new HashMap<>();
     
     public FinancialMetrics calculateMetricsOptimized(String userId) {
@@ -617,11 +600,9 @@ public class DataService {
         metricsCache.clear();
     }
     
-    // Sliding Window algorithm for finding maximum spending in a period
     public double findMaxSpendingInWindow(List<Transaction> transactions, int windowDays) {
         if (transactions.isEmpty()) return 0.0;
         
-        // Sort by date
         List<Transaction> sortedByDate = mergeSortByDate(transactions, true);
         
         double maxSpending = 0.0;
@@ -634,7 +615,6 @@ public class DataService {
                 currentSpending += current.getAmount();
             }
             
-            // Slide window if it exceeds the window size
             while (left <= right && 
                    sortedByDate.get(right).getDate().toEpochDay() - 
                    sortedByDate.get(left).getDate().toEpochDay() > windowDays) {
@@ -650,9 +630,7 @@ public class DataService {
         return maxSpending;
     }
     
-    // Dynamic Programming for optimal budget allocation
     public Map<String, Double> optimalBudgetAllocation(List<Transaction> transactions, double totalBudget) {
-        // Group expenses by category
         Map<String, Double> categoryExpenses = transactions.stream()
             .filter(t -> t.getType() == Transaction.TransactionType.EXPENSE)
             .collect(Collectors.groupingBy(
@@ -664,7 +642,6 @@ public class DataService {
             return new HashMap<>();
         }
         
-        // Use proportional allocation based on historical spending
         double totalExpenses = categoryExpenses.values().stream().mapToDouble(Double::doubleValue).sum();
         Map<String, Double> optimalAllocation = new HashMap<>();
         

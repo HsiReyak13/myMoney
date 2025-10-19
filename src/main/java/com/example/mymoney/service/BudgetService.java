@@ -28,12 +28,10 @@ public class BudgetService {
     }
 
     public Budget getBudget(String userId) {
-        // Check cache first
         if (budgetCache.containsKey(userId)) {
             return budgetCache.get(userId);
         }
 
-        // Load from database
         Budget budget = new Budget(userId);
         loadBudgetFromDatabase(userId, budget);
         budgetCache.put(userId, budget);
@@ -42,7 +40,6 @@ public class BudgetService {
 
     private void loadBudgetFromDatabase(String userId, Budget budget) {
         try {
-            // Load overall budget
             String overallQuery = "SELECT amount FROM overall_budget WHERE user_id = ?";
             PreparedStatement stmt = dbManager.getConnection().prepareStatement(overallQuery);
             stmt.setString(1, userId);
@@ -53,7 +50,6 @@ public class BudgetService {
             }
             stmt.close();
 
-            // Load category budgets
             String categoryQuery = "SELECT category, amount FROM budgets WHERE user_id = ?";
             stmt = dbManager.getConnection().prepareStatement(categoryQuery);
             stmt.setString(1, userId);
@@ -80,11 +76,9 @@ public class BudgetService {
             stmt.executeUpdate();
             stmt.close();
 
-            // Update cache
             Budget budget = getBudget(userId);
             budget.setOverallMonthlyBudget(amount);
 
-            System.out.println("✅ Overall budget updated: $" + amount);
         } catch (SQLException e) {
             System.err.println("❌ Failed to update overall budget!");
             e.printStackTrace();
@@ -102,18 +96,15 @@ public class BudgetService {
             stmt.executeUpdate();
             stmt.close();
 
-            // Update cache
             Budget budget = getBudget(userId);
             budget.setCategoryBudget(category, amount);
 
-            System.out.println("✅ Budget updated for " + category + ": $" + amount);
         } catch (SQLException e) {
             System.err.println("❌ Failed to update category budget!");
             e.printStackTrace();
         }
     }
 
-    // ==================== DSA CONCEPTS FOR BUDGET ANALYSIS ====================
     
     /**
      * Use Binary Search to find optimal budget allocation
@@ -122,7 +113,6 @@ public class BudgetService {
         com.example.mymoney.service.DataService dataService = com.example.mymoney.service.DataService.getInstance();
         List<Transaction> transactions = dataService.getTransactionsForUser(userId);
         
-        // Get historical spending by category
         Map<String, Double> historicalSpending = transactions.stream()
             .filter(t -> t.getType() == Transaction.TransactionType.EXPENSE)
             .collect(Collectors.groupingBy(
@@ -134,7 +124,6 @@ public class BudgetService {
             return new HashMap<>();
         }
         
-        // Use binary search to find optimal allocation
         return binarySearchOptimalAllocation(historicalSpending, totalBudget);
     }
     
@@ -144,7 +133,6 @@ public class BudgetService {
         
         if (totalHistorical == 0) return result;
         
-        // Proportional allocation based on historical data
         for (Map.Entry<String, Double> entry : historicalSpending.entrySet()) {
             double proportion = entry.getValue() / totalHistorical;
             result.put(entry.getKey(), totalBudget * proportion);
@@ -160,10 +148,8 @@ public class BudgetService {
         com.example.mymoney.service.DataService dataService = com.example.mymoney.service.DataService.getInstance();
         List<Transaction> transactions = dataService.getTransactionsForUser(userId);
         
-        // Build adjacency list for spending patterns
         Map<String, List<String>> spendingGraph = dataService.buildSpendingGraph(transactions);
         
-        // Use BFS to find most connected categories
         Map<String, Integer> categoryConnections = new HashMap<>();
         
         for (String category : spendingGraph.keySet()) {
@@ -205,7 +191,6 @@ public class BudgetService {
         com.example.mymoney.service.DataService dataService = com.example.mymoney.service.DataService.getInstance();
         List<Transaction> transactions = dataService.getTransactionsForUser(userId);
         
-        // Get historical spending
         Map<String, Double> historicalSpending = transactions.stream()
             .filter(t -> t.getType() == Transaction.TransactionType.EXPENSE)
             .collect(Collectors.groupingBy(
@@ -213,7 +198,6 @@ public class BudgetService {
                 Collectors.summingDouble(Transaction::getAmount)
             ));
         
-        // Convert to arrays for DP
         List<String> categories = new ArrayList<>(historicalSpending.keySet());
         double[] historical = categories.stream()
             .mapToDouble(historicalSpending::get)
@@ -222,7 +206,6 @@ public class BudgetService {
             .mapToDouble(cat -> priorities.getOrDefault(cat, 1.0))
             .toArray();
         
-        // DP solution for budget allocation
         return solveBudgetDP(categories, historical, priorityWeights, totalBudget);
     }
     
@@ -230,13 +213,10 @@ public class BudgetService {
         int n = categories.size();
         double[][] dp = new double[n + 1][(int) totalBudget + 1];
         
-        // Fill DP table
         for (int i = 1; i <= n; i++) {
             for (int budget = 0; budget <= totalBudget; budget++) {
-                // Don't allocate to this category
                 dp[i][budget] = dp[i - 1][budget];
                 
-                // Try allocating to this category
                 int historicalAmount = (int) historical[i - 1];
                 if (budget >= historicalAmount) {
                     double value = historicalAmount * priorities[i - 1];
@@ -245,7 +225,6 @@ public class BudgetService {
             }
         }
         
-        // Backtrack to find optimal allocation
         Map<String, Double> result = new HashMap<>();
         int budget = (int) totalBudget;
         
@@ -269,11 +248,9 @@ public class BudgetService {
     public List<String> getBudgetRecommendations(String userId) {
         com.example.mymoney.service.DataService dataService = com.example.mymoney.service.DataService.getInstance();
         
-        // Get current month spending
         Map<String, Double> currentSpending = dataService.getCurrentMonthSpending(userId);
         Budget budget = getBudget(userId);
         
-        // Use priority queue to find over-budget categories
         PriorityQueue<Map.Entry<String, Double>> overBudget = new PriorityQueue<>(
             (a, b) -> Double.compare(b.getValue() - budget.getCategoryBudget(a.getKey()), 
                                    a.getValue() - budget.getCategoryBudget(b.getKey()))

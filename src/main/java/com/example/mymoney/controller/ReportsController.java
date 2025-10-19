@@ -38,10 +38,8 @@ public class ReportsController {
         Text title = new Text("Financial Reports & Analytics");
         title.setStyle("-fx-font-size: 32px; -fx-font-weight: bold; -fx-fill: white;");
 
-        // Enhanced Charts section
         VBox chartsSection = createEnhancedChartsSection();
 
-        // Financial insights
         VBox insightsSection = createEnhancedFinancialInsights();
 
         content.getChildren().addAll(title, chartsSection, insightsSection);
@@ -54,7 +52,6 @@ public class ReportsController {
     }
 
 
-    // ==================== ENHANCED CHARTS SECTION ====================
     
     private VBox createEnhancedChartsSection() {
         VBox section = new VBox(20);
@@ -63,7 +60,6 @@ public class ReportsController {
         Text title = new Text("Enhanced Data Visualizations");
         title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-fill: white;");
 
-        // Top row - Pie and Bar charts
         HBox topRow = new HBox(20);
         topRow.setAlignment(Pos.TOP_CENTER);
         
@@ -75,7 +71,6 @@ public class ReportsController {
         
         topRow.getChildren().addAll(pieChartBox, barChartBox);
 
-        // Bottom row - Line and Area charts
         HBox bottomRow = new HBox(20);
         bottomRow.setAlignment(Pos.TOP_CENTER);
         
@@ -91,7 +86,6 @@ public class ReportsController {
         return section;
     }
 
-    // ==================== ENHANCED CHART METHODS ====================
     
     private VBox createEnhancedSpendingPieChart() {
         VBox box = new VBox(15);
@@ -110,7 +104,6 @@ public class ReportsController {
 
         String userId = authService.getCurrentUser().getId();
         
-        // Get category spending data
         Map<String, Double> categorySpending = dataService.getCategorySpending(userId);
 
         if (categorySpending.isEmpty()) {
@@ -118,7 +111,6 @@ public class ReportsController {
             noDataLabel.setStyle("-fx-text-fill: #a8dadc; -fx-font-size: 14px;");
             box.getChildren().addAll(title, noDataLabel);
         } else {
-            // Sort categories by spending amount using Priority Queue concept
             List<Map.Entry<String, Double>> sortedCategories = categorySpending.entrySet().stream()
                 .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
                 .collect(Collectors.toList());
@@ -134,7 +126,6 @@ public class ReportsController {
                 pieChart.getData().add(data);
             }
 
-            // Enhanced legend with DSA insights
             VBox legend = createEnhancedLegend(sortedCategories, total);
             box.getChildren().addAll(title, pieChart, legend);
         }
@@ -171,7 +162,6 @@ public class ReportsController {
         XYChart.Series<String, Number> previousSeries = new XYChart.Series<>();
         previousSeries.setName("Previous Month");
 
-        // Combine all categories
         Set<String> allCategories = new HashSet<>();
         allCategories.addAll(currentMonthSpending.keySet());
         allCategories.addAll(previousMonthSpending.keySet());
@@ -198,7 +188,6 @@ public class ReportsController {
         Text title = new Text("Balance & Expenses Trend");
         title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-fill: white;");
 
-        // Create axes
         NumberAxis xAxis = new NumberAxis();
         xAxis.setLabel("");
         xAxis.setTickLabelFormatter(new NumberAxis.DefaultFormatter(xAxis) {
@@ -225,7 +214,6 @@ public class ReportsController {
 
         String userId = authService.getCurrentUser().getId();
         
-        // Get monthly data
         Map<YearMonth, Double> monthlyIncome = dataService.getMonthlyIncome(userId);
         Map<YearMonth, Double> monthlyExpenses = dataService.getMonthlyExpenses(userId);
 
@@ -239,14 +227,12 @@ public class ReportsController {
         expenseSeries.setName("Expenses");
 
         if (monthlyIncome.isEmpty() && monthlyExpenses.isEmpty()) {
-            // Show empty chart
             for (int i = 1; i <= 6; i++) {
                 balanceSeries.getData().add(new XYChart.Data<>(i, 0));
                 incomeSeries.getData().add(new XYChart.Data<>(i, 0));
                 expenseSeries.getData().add(new XYChart.Data<>(i, 0));
             }
         } else {
-            // Use TreeMap for automatic sorting (Red-Black Tree implementation)
             TreeMap<YearMonth, Double> sortedIncome = new TreeMap<>(monthlyIncome);
             TreeMap<YearMonth, Double> sortedExpenses = new TreeMap<>(monthlyExpenses);
 
@@ -269,7 +255,6 @@ public class ReportsController {
 
         lineChart.getData().addAll(incomeSeries, expenseSeries, balanceSeries);
 
-        // Enhanced stats with DSA insights
         VBox stats = createEnhancedStats(monthlyIncome, monthlyExpenses);
         box.getChildren().addAll(title, lineChart, stats);
         return box;
@@ -332,7 +317,6 @@ public class ReportsController {
     }
 
 
-    // ==================== ENHANCED FINANCIAL INSIGHTS ====================
     
     private VBox createEnhancedFinancialInsights() {
         VBox section = new VBox(20);
@@ -352,7 +336,6 @@ public class ReportsController {
         insights.setVgap(20);
         insights.setAlignment(Pos.CENTER);
 
-        // Highest Expense Category
         VBox highestExpense = createInsightCard(
             "Highest Expense Category",
             getHighestCategory(categorySpending),
@@ -360,7 +343,6 @@ public class ReportsController {
             "#06ffa5"
         );
 
-        // Growth Rate Analysis
         VBox growthRate = createInsightCard(
             "Growth Rate Analysis",
             "Balance Trend",
@@ -368,7 +350,6 @@ public class ReportsController {
             "#06ffa5"
         );
 
-        // Budget Optimization
         VBox budgetOptimization = createInsightCard(
             "Budget Optimization",
             "Recommendation",
@@ -376,7 +357,6 @@ public class ReportsController {
             "#f4a261"
         );
 
-        // Spending Pattern
         VBox spendingPattern = createInsightCard(
             "Spending Pattern",
             "Analysis",
@@ -394,7 +374,6 @@ public class ReportsController {
     }
 
 
-    // ==================== HELPER METHODS ====================
 
     private VBox createInsightCard(String title, String label, String value, String valueColor) {
         VBox card = new VBox(10);
@@ -484,8 +463,6 @@ public class ReportsController {
     }
     
     private Map<String, Double> getPreviousMonthSpending(String userId) {
-        // This would typically query the database for previous month data
-        // For now, return empty map as placeholder
         return new HashMap<>();
     }
     
@@ -495,7 +472,6 @@ public class ReportsController {
         
         if (monthlyIncome.size() < 2) return "Insufficient Data";
         
-        // Calculate growth rate using sliding window
         List<Double> monthlyBalances = new ArrayList<>();
         TreeMap<YearMonth, Double> sortedIncome = new TreeMap<>(monthlyIncome);
         TreeMap<YearMonth, Double> sortedExpenses = new TreeMap<>(monthlyExpenses);

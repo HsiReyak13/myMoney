@@ -35,10 +35,8 @@ public class DashboardController {
         dashboardContent.setPadding(new Insets(30));
         dashboardContent.setAlignment(Pos.TOP_CENTER);
 
-        // Metrics cards
         GridPane metricsGrid = createMetricsCards();
 
-        // Trend chart
         VBox chartSection = createTrendChart();
 
         dashboardContent.getChildren().addAll(metricsGrid, chartSection);
@@ -59,27 +57,22 @@ public class DashboardController {
         grid.setAlignment(Pos.CENTER);
         grid.setMaxWidth(1400);
 
-        // Balance Card
         VBox balanceCard = createMetricCard("Total Balance", "$0.00", "+0%", "metric-positive");
         balanceValue = (Label) ((VBox) balanceCard.getChildren().get(1)).getChildren().get(0);
         grid.add(balanceCard, 0, 0);
 
-        // Income Card
         VBox incomeCard = createMetricCard("Total Income", "$0.00", "+0%", "metric-positive");
         incomeValue = (Label) ((VBox) incomeCard.getChildren().get(1)).getChildren().get(0);
         grid.add(incomeCard, 1, 0);
 
-        // Expenses Card
         VBox expensesCard = createMetricCard("Total Expenses", "$0.00", "+0%", "metric-negative");
         expensesValue = (Label) ((VBox) expensesCard.getChildren().get(1)).getChildren().get(0);
         grid.add(expensesCard, 2, 0);
 
-        // Savings Rate Card
         VBox savingsCard = createMetricCard("Savings Rate", "0%", "+0%", "metric-positive");
         savingsValue = (Label) ((VBox) savingsCard.getChildren().get(1)).getChildren().get(0);
         grid.add(savingsCard, 3, 0);
 
-        // Make cards grow
         for (int i = 0; i < 4; i++) {
             ColumnConstraints col = new ColumnConstraints();
             col.setPercentWidth(25);
@@ -123,7 +116,6 @@ public class DashboardController {
         Text title = new Text("Income vs Expenses Trend");
         title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-fill: white;");
 
-        // Create axes
         NumberAxis xAxis = new NumberAxis();
         xAxis.setLabel("");
         xAxis.setTickLabelFormatter(new NumberAxis.DefaultFormatter(xAxis) {
@@ -155,10 +147,8 @@ public class DashboardController {
     public void refresh() {
         String userId = authService.getCurrentUser().getId();
         
-        // Use optimized metrics calculation with memoization
         FinancialMetrics metrics = dataService.calculateMetricsOptimized(userId);
 
-        // Update metric cards
         balanceValue.setText(metrics.getFormattedBalance());
         balanceValue.getStyleClass().clear();
         balanceValue.getStyleClass().addAll("metric-value", 
@@ -168,32 +158,24 @@ public class DashboardController {
         expensesValue.setText(metrics.getFormattedExpenses());
         savingsValue.setText(metrics.getFormattedSavingsRate());
 
-        // Update trend chart with DSA optimizations
         updateTrendChart(userId);
         
-        // Show DSA performance insights
         showDSAInsights(userId);
     }
     
     private void showDSAInsights(String userId) {
-        // Get all transactions for analysis
         List<Transaction> allTransactions = dataService.getTransactionsForUser(userId);
         
         if (allTransactions.isEmpty()) return;
         
-        // Demonstrate various DSA concepts
         long startTime = System.nanoTime();
         
-        // 1. Find maximum spending in a 7-day window using sliding window
         double maxSpending = dataService.findMaxSpendingInWindow(allTransactions, 7);
         
-        // 2. Get optimal budget allocation using dynamic programming
         Map<String, Double> optimalBudget = dataService.optimalBudgetAllocation(allTransactions, 5000.0);
         
-        // 3. Build spending pattern graph
         Map<String, List<String>> spendingGraph = dataService.buildSpendingGraph(allTransactions);
         
-        // 4. Get top spending categories using priority queue
         List<Transaction> topExpenses = dataService.getTopNTransactionsByAmount(
             allTransactions.stream()
                 .filter(t -> t.getType() == Transaction.TransactionType.EXPENSE)
@@ -204,13 +186,6 @@ public class DashboardController {
         long endTime = System.nanoTime();
         double analysisTime = (endTime - startTime) / 1_000_000.0;
         
-        // Log DSA insights (in a real app, you might show this in a dedicated panel)
-        System.out.println("=== DSA FINANCIAL ANALYSIS ===");
-        System.out.println("Max 7-day spending: $" + String.format("%.2f", maxSpending));
-        System.out.println("Analysis time: " + String.format("%.3f", analysisTime) + " ms");
-        System.out.println("Spending pattern graph nodes: " + spendingGraph.size());
-        System.out.println("Top 3 expenses found using Priority Queue");
-        System.out.println("==========================================");
     }
 
     private void updateTrendChart(String userId) {

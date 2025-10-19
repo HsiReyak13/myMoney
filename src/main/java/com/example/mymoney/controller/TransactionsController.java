@@ -39,10 +39,8 @@ public class TransactionsController {
         VBox root = new VBox(20);
         root.setPadding(new Insets(30));
 
-        // Header with title and buttons
         HBox header = createHeader();
 
-        // Transaction table
         VBox tableSection = createTransactionTable();
 
         root.getChildren().addAll(header, tableSection);
@@ -59,7 +57,6 @@ public class TransactionsController {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // DSA Controls
         HBox dsaControls = createDSAControls();
 
         Button exportButton = new Button("Export CSV");
@@ -78,7 +75,6 @@ public class TransactionsController {
         HBox controls = new HBox(10);
         controls.setAlignment(Pos.CENTER);
 
-        // Sort ComboBox
         ComboBox<String> sortCombo = new ComboBox<>();
         sortCombo.getItems().addAll(
             "Sort by Date",
@@ -104,18 +100,15 @@ public class TransactionsController {
         transactionTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         transactionTable.setPrefHeight(500);
 
-        // Date column
         TableColumn<Transaction, String> dateColumn = new TableColumn<>("Date");
         dateColumn.setCellValueFactory(cellData -> 
             new javafx.beans.property.SimpleStringProperty(cellData.getValue().getFormattedDate()));
         dateColumn.setPrefWidth(150);
 
-        // Category column
         TableColumn<Transaction, String> categoryColumn = new TableColumn<>("Category");
         categoryColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
         categoryColumn.setPrefWidth(200);
 
-        // Amount column with color coding
         TableColumn<Transaction, String> amountColumn = new TableColumn<>("Amount");
         amountColumn.setCellValueFactory(cellData -> {
             Transaction t = cellData.getValue();
@@ -141,7 +134,6 @@ public class TransactionsController {
         });
         amountColumn.setPrefWidth(150);
 
-        // Note column
         TableColumn<Transaction, String> noteColumn = new TableColumn<>("Note");
         noteColumn.setCellValueFactory(new PropertyValueFactory<>("notes"));
         noteColumn.setPrefWidth(300);
@@ -165,7 +157,6 @@ public class TransactionsController {
             refreshTable();
             onTransactionChange.run();
 
-            // Show success notification
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Success");
             alert.setHeaderText(null);
@@ -208,7 +199,6 @@ public class TransactionsController {
         transactionList.setAll(dataService.getTransactionsForUser(userId));
     }
 
-    // ==================== DSA FUNCTIONALITY METHODS ====================
     
     private void applySorting(String sortType) {
         if (sortType == null) return;

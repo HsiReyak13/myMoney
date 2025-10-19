@@ -20,22 +20,18 @@ public class WelcomeController {
     }
 
     public Scene createWelcomeScene() {
-        // Main container with split view
         HBox mainContainer = new HBox(0);
         mainContainer.setPrefSize(1200, 700);
         
-        // LEFT SIDE - Welcome Info
         VBox leftSide = new VBox(30);
         leftSide.getStyleClass().add("welcome-left-side");
         leftSide.setAlignment(Pos.CENTER);
         leftSide.setPrefWidth(600);
         HBox.setHgrow(leftSide, Priority.ALWAYS);
         
-        // Top spacer for centering
         Region topSpacerLeft = new Region();
         VBox.setVgrow(topSpacerLeft, Priority.ALWAYS);
         
-        // Welcome title and description
         Text welcomeTitle = new Text("Welcome to MyMoney");
         welcomeTitle.getStyleClass().add("welcome-main-title");
         
@@ -46,7 +42,6 @@ public class WelcomeController {
         welcomeDesc.setWrappingWidth(500);
         welcomeDesc.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
         
-        // Features list for left side - in centered container with left-aligned items
         VBox leftFeaturesContainer = new VBox(15);
         leftFeaturesContainer.setAlignment(Pos.CENTER);
         leftFeaturesContainer.setMaxWidth(500);
@@ -70,24 +65,20 @@ public class WelcomeController {
         leftFeatures.getChildren().addAll(feature1Left, feature2Left, feature3Left, feature4Left);
         leftFeaturesContainer.getChildren().add(leftFeatures);
         
-        // Bottom spacer for centering
         Region bottomSpacerLeft = new Region();
         VBox.setVgrow(bottomSpacerLeft, Priority.ALWAYS);
         
-        // Footer credit
         Text footerCredit = new Text("designed by MyMoney Team");
         footerCredit.getStyleClass().add("footer-credit");
         
         leftSide.getChildren().addAll(topSpacerLeft, welcomeTitle, welcomeDesc, leftFeaturesContainer, bottomSpacerLeft, footerCredit);
         
-        // RIGHT SIDE - Get Started Section
         rightSide = new VBox(30);
         rightSide.getStyleClass().add("welcome-right-side");
         rightSide.setAlignment(Pos.CENTER);
         rightSide.setPrefWidth(600);
         HBox.setHgrow(rightSide, Priority.ALWAYS);
         
-        // Create the original right content
         originalRightContent = createRightSideContent();
         
         rightSide.getChildren().add(originalRightContent);
@@ -104,11 +95,9 @@ public class WelcomeController {
         content.setAlignment(Pos.CENTER);
         VBox.setVgrow(content, Priority.ALWAYS);
         
-        // Top spacer for vertical centering
         Region topSpacer = new Region();
         VBox.setVgrow(topSpacer, Priority.ALWAYS);
         
-        // Get Started Section
         Text getStartedTitle = new Text("GET STARTED");
         getStartedTitle.getStyleClass().add("get-started-title");
         
@@ -116,14 +105,12 @@ public class WelcomeController {
         getStartedDesc.getStyleClass().add("get-started-description");
         getStartedDesc.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
         
-        // Primary CTA - Sign Up (larger, more prominent)
         Button signUpButton = new Button("SIGN UP FREE");
         signUpButton.getStyleClass().add("primary-cta-button");
         signUpButton.setOnAction(e -> showSignupForm());
         signUpButton.setPrefWidth(280);
         signUpButton.setPrefHeight(55);
         
-        // Secondary CTA - Sign In (smaller, ghost style)
         VBox signInSection = new VBox(8);
         signInSection.setAlignment(Pos.CENTER);
         
@@ -140,11 +127,9 @@ public class WelcomeController {
         VBox buttonBox = new VBox(20, signUpButton, signInSection);
         buttonBox.setAlignment(Pos.CENTER);
         
-        // Social proof
         Label socialProof = new Label("✓ No credit card required  •  ✓ Free forever");
         socialProof.getStyleClass().add("social-proof-label");
         
-        // Bottom spacer for vertical centering
         Region bottomSpacer = new Region();
         VBox.setVgrow(bottomSpacer, Priority.ALWAYS);
         
