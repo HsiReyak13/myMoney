@@ -17,6 +17,8 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TransactionsController {
     private final AuthenticationService authService;
@@ -37,10 +39,8 @@ public class TransactionsController {
         VBox root = new VBox(20);
         root.setPadding(new Insets(30));
 
-        // Header with title and buttons
         HBox header = createHeader();
 
-        // Transaction table
         VBox tableSection = createTransactionTable();
 
         root.getChildren().addAll(header, tableSection);
@@ -57,6 +57,8 @@ public class TransactionsController {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
+        HBox dsaControls = createDSAControls();
+
         Button exportButton = new Button("Export CSV");
         exportButton.getStyleClass().add("secondary-button");
         exportButton.setOnAction(e -> exportToCSV());
@@ -65,8 +67,28 @@ public class TransactionsController {
         addButton.getStyleClass().add("primary-button");
         addButton.setOnAction(e -> showAddTransactionDialog());
 
-        header.getChildren().addAll(title, spacer, exportButton, addButton);
+        header.getChildren().addAll(title, spacer, dsaControls, exportButton, addButton);
         return header;
+    }
+
+    private HBox createDSAControls() {
+        HBox controls = new HBox(10);
+        controls.setAlignment(Pos.CENTER);
+
+        ComboBox<String> sortCombo = new ComboBox<>();
+        sortCombo.getItems().addAll(
+            "Sort by Date",
+            "Sort by Amount", 
+            "Sort by Category",
+            "Top 5 Highest",
+            "Top 5 Lowest"
+        );
+        sortCombo.setPromptText("Sort transactions...");
+        sortCombo.setPrefWidth(200);
+        sortCombo.setOnAction(e -> applySorting(sortCombo.getValue()));
+
+        controls.getChildren().addAll(sortCombo);
+        return controls;
     }
 
     private VBox createTransactionTable() {
@@ -78,18 +100,15 @@ public class TransactionsController {
         transactionTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         transactionTable.setPrefHeight(500);
 
-        // Date column
         TableColumn<Transaction, String> dateColumn = new TableColumn<>("Date");
         dateColumn.setCellValueFactory(cellData -> 
             new javafx.beans.property.SimpleStringProperty(cellData.getValue().getFormattedDate()));
         dateColumn.setPrefWidth(150);
 
-        // Category column
         TableColumn<Transaction, String> categoryColumn = new TableColumn<>("Category");
         categoryColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
         categoryColumn.setPrefWidth(200);
 
-        // Amount column with color coding
         TableColumn<Transaction, String> amountColumn = new TableColumn<>("Amount");
         amountColumn.setCellValueFactory(cellData -> {
             Transaction t = cellData.getValue();
@@ -115,7 +134,6 @@ public class TransactionsController {
         });
         amountColumn.setPrefWidth(150);
 
-        // Note column
         TableColumn<Transaction, String> noteColumn = new TableColumn<>("Note");
         noteColumn.setCellValueFactory(new PropertyValueFactory<>("notes"));
         noteColumn.setPrefWidth(300);
@@ -139,7 +157,6 @@ public class TransactionsController {
             refreshTable();
             onTransactionChange.run();
 
-            // Show success notification
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Success");
             alert.setHeaderText(null);
@@ -181,4 +198,34 @@ public class TransactionsController {
         String userId = authService.getCurrentUser().getId();
         transactionList.setAll(dataService.getTransactionsForUser(userId));
     }
+
+    
+    private void applySorting(String sortType) {
+        if (sortType == null) return;
+        
+        String userId = authService.getCurrentUser().getId();
+        List<Transaction> transactions = dataService.getTransactionsForUser(userId);
+        List<Transaction> sortedTransactions = new ArrayList<>();
+        
+        switch (sortType) {
+            case "Sort by Date":
+                sortedTransactions = dataService.mergeSortByDate(transactions, false); // Descending
+                break;
+            case "Sort by Amount":
+                sortedTransactions = dataService.quickSortByAmount(transactions, false); // Descending
+                break;
+            case "Sort by Category":
+                sortedTransactions = dataService.heapSortByCategory(transactions, true); // Ascending
+                break;
+            case "Top 5 Highest":
+                sortedTransactions = dataService.getTopNTransactionsByAmount(transactions, 5, true);
+                break;
+            case "Top 5 Lowest":
+                sortedTransactions = dataService.getTopNTransactionsByAmount(transactions, 5, false);
+                break;
+        }
+        
+        transactionList.setAll(sortedTransactions);
+    }
+    
 }

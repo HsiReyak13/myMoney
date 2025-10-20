@@ -48,7 +48,6 @@ public class AddTransactionDialog {
         dialogBox.setMaxWidth(480);
         dialogBox.setPadding(new Insets(25));
 
-        // Header with close button
         HBox header = new HBox();
         header.setAlignment(Pos.CENTER_LEFT);
 
@@ -64,7 +63,6 @@ public class AddTransactionDialog {
 
         header.getChildren().addAll(title, spacer, closeButton);
 
-        // Type
         Label typeLabel = new Label("Type");
         typeLabel.getStyleClass().add("field-label");
         typeLabel.setStyle("-fx-text-fill: white; -fx-font-size: 13px;");
@@ -75,7 +73,6 @@ public class AddTransactionDialog {
         typeCombo.setMaxWidth(Double.MAX_VALUE);
         typeCombo.setPrefHeight(40);
 
-        // Date
         Label dateLabel = new Label("Date");
         dateLabel.getStyleClass().add("field-label");
         dateLabel.setStyle("-fx-text-fill: white; -fx-font-size: 13px;");
@@ -84,7 +81,6 @@ public class AddTransactionDialog {
         datePicker.setMaxWidth(Double.MAX_VALUE);
         datePicker.setPrefHeight(40);
 
-        // Category
         Label categoryLabel = new Label("Category");
         categoryLabel.getStyleClass().add("field-label");
         categoryLabel.setStyle("-fx-text-fill: white; -fx-font-size: 13px;");
@@ -93,7 +89,6 @@ public class AddTransactionDialog {
         categoryCombo.setMaxWidth(Double.MAX_VALUE);
         categoryCombo.setPrefHeight(40);
 
-        // Update categories based on type
         typeCombo.setOnAction(e -> {
             categoryCombo.getItems().clear();
             if (typeCombo.getValue().equals("Income")) {
@@ -106,11 +101,9 @@ public class AddTransactionDialog {
             }
         });
 
-        // Initialize categories
         categoryCombo.getItems().addAll("Groceries", "Utilities", "Transportation", "Entertainment", "Healthcare", "Shopping", "Food", "Other Expense");
         categoryCombo.setValue("Groceries");
 
-        // Amount
         Label amountLabel = new Label("Amount");
         amountLabel.getStyleClass().add("field-label");
         amountLabel.setStyle("-fx-text-fill: white; -fx-font-size: 13px;");
@@ -119,7 +112,6 @@ public class AddTransactionDialog {
         amountField.getStyleClass().add("text-field");
         amountField.setPrefHeight(40);
 
-        // Note
         Label noteLabel = new Label("Note");
         noteLabel.getStyleClass().add("field-label");
         noteLabel.setStyle("-fx-text-fill: white; -fx-font-size: 13px;");
@@ -128,18 +120,15 @@ public class AddTransactionDialog {
         noteField.getStyleClass().add("text-field");
         noteField.setPrefHeight(40);
 
-        // Error label
         Label errorLabel = new Label();
         errorLabel.getStyleClass().add("error-label");
         errorLabel.setVisible(false);
         errorLabel.setWrapText(true);
         errorLabel.setMaxWidth(Double.MAX_VALUE);
 
-        // Spacer before buttons
         Region buttonSpacer = new Region();
         buttonSpacer.setPrefHeight(5);
 
-        // Buttons
         HBox buttonBox = new HBox(15);
         buttonBox.setAlignment(Pos.CENTER);
         buttonBox.setPadding(new Insets(5, 0, 0, 0));

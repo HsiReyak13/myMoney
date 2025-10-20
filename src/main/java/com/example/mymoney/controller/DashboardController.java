@@ -1,6 +1,7 @@
 package com.example.mymoney.controller;
 
 import com.example.mymoney.model.FinancialMetrics;
+import com.example.mymoney.model.Transaction;
 import com.example.mymoney.service.AuthenticationService;
 import com.example.mymoney.service.DataService;
 import javafx.geometry.Insets;
@@ -14,8 +15,8 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 
 import java.time.YearMonth;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class DashboardController {
     private final AuthenticationService authService;
@@ -34,10 +35,8 @@ public class DashboardController {
         dashboardContent.setPadding(new Insets(30));
         dashboardContent.setAlignment(Pos.TOP_CENTER);
 
-        // Metrics cards
         GridPane metricsGrid = createMetricsCards();
 
-        // Trend chart
         VBox chartSection = createTrendChart();
 
         dashboardContent.getChildren().addAll(metricsGrid, chartSection);
@@ -58,27 +57,22 @@ public class DashboardController {
         grid.setAlignment(Pos.CENTER);
         grid.setMaxWidth(1400);
 
-        // Balance Card
         VBox balanceCard = createMetricCard("Total Balance", "$0.00", "+0%", "metric-positive");
         balanceValue = (Label) ((VBox) balanceCard.getChildren().get(1)).getChildren().get(0);
         grid.add(balanceCard, 0, 0);
 
-        // Income Card
         VBox incomeCard = createMetricCard("Total Income", "$0.00", "+0%", "metric-positive");
         incomeValue = (Label) ((VBox) incomeCard.getChildren().get(1)).getChildren().get(0);
         grid.add(incomeCard, 1, 0);
 
-        // Expenses Card
         VBox expensesCard = createMetricCard("Total Expenses", "$0.00", "+0%", "metric-negative");
         expensesValue = (Label) ((VBox) expensesCard.getChildren().get(1)).getChildren().get(0);
         grid.add(expensesCard, 2, 0);
 
-        // Savings Rate Card
         VBox savingsCard = createMetricCard("Savings Rate", "0%", "+0%", "metric-positive");
         savingsValue = (Label) ((VBox) savingsCard.getChildren().get(1)).getChildren().get(0);
         grid.add(savingsCard, 3, 0);
 
-        // Make cards grow
         for (int i = 0; i < 4; i++) {
             ColumnConstraints col = new ColumnConstraints();
             col.setPercentWidth(25);
@@ -122,7 +116,6 @@ public class DashboardController {
         Text title = new Text("Income vs Expenses Trend");
         title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-fill: white;");
 
-        // Create axes
         NumberAxis xAxis = new NumberAxis();
         xAxis.setLabel("");
         xAxis.setTickLabelFormatter(new NumberAxis.DefaultFormatter(xAxis) {
@@ -153,9 +146,9 @@ public class DashboardController {
 
     public void refresh() {
         String userId = authService.getCurrentUser().getId();
-        FinancialMetrics metrics = dataService.calculateMetrics(userId);
+        
+        FinancialMetrics metrics = dataService.calculateMetricsOptimized(userId);
 
-        // Update metric cards
         balanceValue.setText(metrics.getFormattedBalance());
         balanceValue.getStyleClass().clear();
         balanceValue.getStyleClass().addAll("metric-value", 
@@ -165,8 +158,34 @@ public class DashboardController {
         expensesValue.setText(metrics.getFormattedExpenses());
         savingsValue.setText(metrics.getFormattedSavingsRate());
 
-        // Update trend chart
         updateTrendChart(userId);
+        
+        showDSAInsights(userId);
+    }
+    
+    private void showDSAInsights(String userId) {
+        List<Transaction> allTransactions = dataService.getTransactionsForUser(userId);
+        
+        if (allTransactions.isEmpty()) return;
+        
+        long startTime = System.nanoTime();
+        
+        double maxSpending = dataService.findMaxSpendingInWindow(allTransactions, 7);
+        
+        Map<String, Double> optimalBudget = dataService.optimalBudgetAllocation(allTransactions, 5000.0);
+        
+        Map<String, List<String>> spendingGraph = dataService.buildSpendingGraph(allTransactions);
+        
+        List<Transaction> topExpenses = dataService.getTopNTransactionsByAmount(
+            allTransactions.stream()
+                .filter(t -> t.getType() == Transaction.TransactionType.EXPENSE)
+                .collect(java.util.stream.Collectors.toList()), 
+            3, true
+        );
+        
+        long endTime = System.nanoTime();
+        double analysisTime = (endTime - startTime) / 1_000_000.0;
+        
     }
 
     private void updateTrendChart(String userId) {

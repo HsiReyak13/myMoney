@@ -70,7 +70,7 @@ public class Transaction {
     }
 
     public String getFormattedAmount() {
-        return String.format("$%.2f", amount);
+        return String.format("₱%.2f", amount);
     }
 }
 

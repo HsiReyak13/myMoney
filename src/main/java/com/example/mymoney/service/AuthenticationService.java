@@ -31,7 +31,6 @@ public class AuthenticationService {
 
     public boolean register(String username, String password) {
         try {
-            // Check if user already exists
             String checkQuery = "SELECT id FROM users WHERE username = ?";
             PreparedStatement checkStmt = dbManager.getConnection().prepareStatement(checkQuery);
             checkStmt.setString(1, username);
@@ -43,7 +42,6 @@ public class AuthenticationService {
             }
             checkStmt.close();
 
-            // Create new user
             String salt = generateSalt();
             String passwordHash = hashPassword(password, salt);
             String userId = UUID.randomUUID().toString();
@@ -58,7 +56,6 @@ public class AuthenticationService {
             int result = stmt.executeUpdate();
             stmt.close();
             
-            System.out.println("✅ User registered: " + username);
             return result > 0;
             
         } catch (SQLException e) {
@@ -86,13 +83,11 @@ public class AuthenticationService {
                 if (passwordHash.equals(dbPasswordHash)) {
                     currentUser = new User(id, dbUsername, dbPasswordHash, dbSalt);
                     stmt.close();
-                    System.out.println("✅ User logged in: " + username);
                     return true;
                 }
             }
             
             stmt.close();
-            System.out.println("❌ Login failed for: " + username);
             return false;
             
         } catch (SQLException e) {
@@ -104,7 +99,6 @@ public class AuthenticationService {
 
     public void logout() {
         currentUser = null;
-        System.out.println("✅ User logged out");
     }
 
     public User getCurrentUser() {
