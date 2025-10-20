@@ -144,7 +144,7 @@ public class ReportsController {
 
         CategoryAxis xAxis = new CategoryAxis();
         NumberAxis yAxis = new NumberAxis();
-        yAxis.setLabel("Amount ($)");
+        yAxis.setLabel("Amount (₱)");
 
         BarChart<String, Number> barChart = new BarChart<>(xAxis, yAxis);
         barChart.setTitle("");
@@ -203,7 +203,7 @@ public class ReportsController {
         });
 
         NumberAxis yAxis = new NumberAxis();
-        yAxis.setLabel("Amount ($)");
+        yAxis.setLabel("Amount (₱)");
 
         LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
         lineChart.setTitle("");
@@ -272,7 +272,7 @@ public class ReportsController {
         NumberAxis xAxis = new NumberAxis();
         xAxis.setLabel("Month");
         NumberAxis yAxis = new NumberAxis();
-        yAxis.setLabel("Savings ($)");
+        yAxis.setLabel("Savings (₱)");
 
         AreaChart<Number, Number> areaChart = new AreaChart<>(xAxis, yAxis);
         areaChart.setTitle("");
@@ -339,7 +339,7 @@ public class ReportsController {
         VBox highestExpense = createInsightCard(
             "Highest Expense Category",
             getHighestCategory(categorySpending),
-            String.format("$%.2f", getHighestAmount(categorySpending)),
+            String.format("₱%.2f", getHighestAmount(categorySpending)),
             "#06ffa5"
         );
 
@@ -412,7 +412,7 @@ public class ReportsController {
             HBox.setHgrow(spacer, Priority.ALWAYS);
 
             double percentage = (entry.getValue() / total) * 100;
-            Label amountLabel = new Label(String.format("$%.2f (%.1f%%)", entry.getValue(), percentage));
+            Label amountLabel = new Label(String.format("₱%.2f (%.1f%%)", entry.getValue(), percentage));
             amountLabel.setStyle("-fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold;");
 
             legendItem.getChildren().addAll(colorBox, categoryLabel, spacer, amountLabel);
@@ -435,7 +435,7 @@ public class ReportsController {
         avgBalance.setAlignment(Pos.CENTER);
         Label avgBalanceTitle = new Label("Average Monthly Balance");
         avgBalanceTitle.setStyle("-fx-text-fill: #a8dadc; -fx-font-size: 12px;");
-        Label avgBalanceValue = new Label(String.format("$%.2f", metrics.getCurrentBalance() / monthCount));
+        Label avgBalanceValue = new Label(String.format("₱%.2f", metrics.getCurrentBalance() / monthCount));
         avgBalanceValue.setStyle("-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;");
         avgBalance.getChildren().addAll(avgBalanceTitle, avgBalanceValue);
 
@@ -443,7 +443,7 @@ public class ReportsController {
         avgExpenses.setAlignment(Pos.CENTER);
         Label avgExpensesTitle = new Label("Average Monthly Expenses");
         avgExpensesTitle.setStyle("-fx-text-fill: #a8dadc; -fx-font-size: 12px;");
-        Label avgExpensesValue = new Label(String.format("$%.2f", metrics.getTotalExpenses() / monthCount));
+        Label avgExpensesValue = new Label(String.format("₱%.2f", metrics.getTotalExpenses() / monthCount));
         avgExpensesValue.setStyle("-fx-text-fill: #e63946; -fx-font-size: 18px; -fx-font-weight: bold;");
         avgExpenses.getChildren().addAll(avgExpensesTitle, avgExpensesValue);
         

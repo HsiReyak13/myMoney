@@ -30,15 +30,15 @@ public class FinancialMetrics {
     }
 
     public String getFormattedIncome() {
-        return String.format("$%.2f", totalIncome);
+        return String.format("₱%.2f", totalIncome);
     }
 
     public String getFormattedExpenses() {
-        return String.format("$%.2f", totalExpenses);
+        return String.format("₱%.2f", totalExpenses);
     }
 
     public String getFormattedBalance() {
-        return String.format("$%.2f", currentBalance);
+        return String.format("₱%.2f", currentBalance);
     }
 
     public String getFormattedSavingsRate() {
