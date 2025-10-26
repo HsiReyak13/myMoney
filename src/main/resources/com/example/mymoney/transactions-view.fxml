@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" spacing="15" style="-fx-background-color: transparent;">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <!-- Header with Toggle and Totals -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <ToggleButton fx:id="incomeToggle" text="Income" styleClass="segmented-toggle"/>
+        <ToggleButton fx:id="expenseToggle" text="Expenses" styleClass="segmented-toggle"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="incomeTotalLabel" text="Income: $0" style="-fx-text-fill: #06ffa5; -fx-font-weight: bold;"/>
+        <Label fx:id="expenseTotalLabel" text="Expenses: $0" style="-fx-text-fill: #e63946; -fx-font-weight: bold;"/>
+        <Button fx:id="exportBtn" text="Export CSV" styleClass="secondary-button"/>
+        <Button fx:id="addBtn" text="+ Add" styleClass="primary-button"/>
+    </HBox>
+
+    <!-- Filters Row -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <DatePicker fx:id="fromDate" promptText="From"/>
+        <DatePicker fx:id="toDate" promptText="To"/>
+        <ComboBox fx:id="categoryFilter" promptText="Category" prefWidth="160"/>
+        <TextField fx:id="searchField" promptText="Search notes, merchant" prefWidth="240"/>
+        <TextField fx:id="minAmount" promptText="Min" prefWidth="90"/>
+        <TextField fx:id="maxAmount" promptText="Max" prefWidth="90"/>
+        <Button fx:id="clearFiltersBtn" text="Clear"/>
+    </HBox>
+
+    <!-- Main Content: Table + Insights -->
+    <SplitPane dividerPositions="0.72" VBox.vgrow="ALWAYS">
+        <!-- Transactions Table -->
+        <TableView fx:id="transactionsTable" styleClass="table-view">
+            <columns>
+                <TableColumn fx:id="dateCol" text="Date" prefWidth="120"/>
+                <TableColumn fx:id="categoryCol" text="Category" prefWidth="160"/>
+                <TableColumn fx:id="noteCol" text="Note" prefWidth="260"/>
+                <TableColumn fx:id="amountCol" text="Amount" prefWidth="120"/>
+                <TableColumn fx:id="accountCol" text="Account" prefWidth="140"/>
+            </columns>
+        </TableView>
+
+        <!-- Insights Panel -->
+        <VBox spacing="15" style="-fx-background-color: rgba(0,0,0,0.2); -fx-padding: 15;">
+            <Label text="Insights" style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;"/>
+            
+            <!-- Category Breakdown Chart -->
+            <VBox spacing="5" VBox.vgrow="ALWAYS">
+                <Label text="Category Breakdown" style="-fx-text-fill: #a8dadc; -fx-font-size: 12px;"/>
+                <PieChart fx:id="categoryChart" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS"/>
+            </VBox>
+
+            <!-- Trends Chart -->
+            <VBox spacing="5" VBox.vgrow="ALWAYS">
+                <Label text="Trends" style="-fx-text-fill: #a8dadc; -fx-font-size: 12px;"/>
+                <LineChart fx:id="trendsChart" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
+                    <xAxis>
+                        <NumberAxis side="BOTTOM"/>
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis side="LEFT"/>
+                    </yAxis>
+                </LineChart>
+            </VBox>
+        </VBox>
+    </SplitPane>
+</VBox>
