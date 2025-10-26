@@ -1,12 +1,12 @@
 /* Root Styles */
 .root {
-    -fx-background-color: linear-gradient(to bottom, #1a1a2e, #16213e);
+    -fx-background-color: linear-gradient(#1a1a2e, #16213e);
     -fx-font-family: "Segoe UI", Arial, sans-serif;
 }
 
 /* Welcome Screen Styles */
 .welcome-container {
-    -fx-background-color: linear-gradient(to bottom, #1a1a2e, #16213e);
+    -fx-background-color: linear-gradient(#1a1a2e, #16213e);
     -fx-padding: 40;
 }
 
@@ -23,7 +23,7 @@
 
 /* Button Styles */
 .primary-button {
-    -fx-background-color: linear-gradient(to right, #457b9d, #1d3557);
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 0%, #457b9d 0%, #1d3557 100%);
     -fx-text-fill: white;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
@@ -34,7 +34,7 @@
 }
 
 .primary-button:hover {
-    -fx-background-color: linear-gradient(to right, #5a8fb4, #2d4567);
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 0%, #5a8fb4 0%, #2d4567 100%);
     -fx-scale-y: 1.05;
     -fx-scale-x: 1.05;
 }
@@ -58,7 +58,7 @@
 }
 
 .danger-button {
-    -fx-background-color: linear-gradient(to right, #e63946, #d62828);
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 0%, #e63946 0%, #d62828 100%);
     -fx-text-fill: white;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
@@ -68,7 +68,7 @@
 }
 
 .danger-button:hover {
-    -fx-background-color: linear-gradient(to right, #f25a64, #e63946);
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 0%, #f25a64 0%, #e63946 100%);
     -fx-scale-y: 1.05;
     -fx-scale-x: 1.05;
 }
@@ -173,14 +173,14 @@
 
 /* Metric Card Styles */
 .metric-card {
-    -fx-background-color: linear-gradient(to bottom right, rgba(69, 123, 157, 0.3), rgba(29, 53, 87, 0.3));
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, rgba(69, 123, 157, 0.3) 0%, rgba(29, 53, 87, 0.3) 100%);
     -fx-background-radius: 15;
     -fx-padding: 25;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 3);
 }
 
 .metric-card:hover {
-    -fx-background-color: linear-gradient(to bottom right, rgba(69, 123, 157, 0.4), rgba(29, 53, 87, 0.4));
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, rgba(69, 123, 157, 0.4) 0%, rgba(29, 53, 87, 0.4) 100%);
     -fx-scale-y: 1.03;
     -fx-scale-x: 1.03;
 }
@@ -323,44 +323,190 @@
     -fx-background-color: rgba(69, 123, 157, 0.3);
 }
 
-/* DatePicker Styles */
+/* DatePicker Base Styles */
 .date-picker {
     -fx-background-color: rgba(50, 50, 70, 0.6);
     -fx-background-radius: 8;
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-text-fill: #ffffff;
 }
 
 .date-picker .text-field {
     -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: rgba(255, 255, 255, 0.5);
+    -fx-font-size: 14px;
     -fx-border-color: transparent;
+    -fx-highlight-fill: #06ffa5;
+    -fx-highlight-text-fill: #1a1a2e;
 }
 
 .date-picker:focused {
-    -fx-border-color: #457b9d;
+    -fx-border-color: #06ffa5;
     -fx-border-width: 2;
 }
 
+.date-picker .arrow-button {
+    -fx-background-color: rgba(69, 123, 157, 0.3);
+    -fx-background-radius: 0 8 8 0;
+}
+
+.date-picker .arrow-button:hover {
+    -fx-background-color: rgba(69, 123, 157, 0.5);
+}
+
+.date-picker .arrow-button .arrow {
+    -fx-background-color: #ffffff;
+}
+
+/* DatePicker Popup - DARK BACKGROUND */
 .date-picker-popup {
     -fx-background-color: #1a1a2e;
-    -fx-border-color: #457b9d;
+    -fx-border-color: #06ffa5;
+    -fx-border-width: 2;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 15, 0, 0, 5);
 }
 
+/* Calendar Grid - FORCE DARK BACKGROUND */
+.date-picker-popup .calendar-grid {
+    -fx-background-color: #1a1a2e;
+    -fx-padding: 15;
+}
+
+/* Month/Year Header */
 .date-picker-popup .month-year-pane {
-    -fx-background-color: rgba(69, 123, 157, 0.3);
+    -fx-background-color: #16213e;
+    -fx-padding: 15;
 }
 
-.date-picker-popup .day-cell {
+.date-picker-popup .month-year-pane .label {
+    -fx-text-fill: #06ffa5;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+/* Navigation Buttons */
+.date-picker-popup .spinner {
     -fx-background-color: transparent;
-    -fx-text-fill: white;
 }
 
+.date-picker-popup .spinner .button {
+    -fx-background-color: rgba(6, 255, 165, 0.15);
+    -fx-text-fill: #06ffa5;
+    -fx-background-radius: 6;
+    -fx-padding: 8 12;
+}
+
+.date-picker-popup .spinner .button:hover {
+    -fx-background-color: rgba(6, 255, 165, 0.3);
+}
+
+.date-picker-popup .previous-month-button,
+.date-picker-popup .next-month-button {
+    -fx-background-color: rgba(6, 255, 165, 0.15);
+}
+
+.date-picker-popup .previous-month-button:hover,
+.date-picker-popup .next-month-button:hover {
+    -fx-background-color: rgba(6, 255, 165, 0.3);
+}
+
+.date-picker-popup .previous-month-button .arrow,
+.date-picker-popup .next-month-button .arrow {
+    -fx-background-color: #06ffa5;
+}
+
+/* Day Name Headers */
+.date-picker-popup .day-name-cell {
+    -fx-background-color: rgba(6, 255, 165, 0.1);
+    -fx-text-fill: #06ffa5;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 8;
+    -fx-alignment: center;
+}
+
+/* Week Numbers */
+.date-picker-popup .week-number-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(168, 218, 220, 0.6);
+    -fx-font-size: 11px;
+    -fx-padding: 8;
+    -fx-font-weight: bold;
+}
+
+/* Day Cells - WHITE TEXT ON DARK BACKGROUND */
+.date-picker-popup .day-cell {
+    -fx-background-color: #1a1a2e;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-padding: 12;
+    -fx-background-radius: 6;
+    -fx-border-color: transparent;
+    -fx-alignment: center;
+}
+
+/* Current Month Days */
+.date-picker-popup .day-cell.current-month {
+    -fx-text-fill: #ffffff;
+}
+
+/* Hover State */
 .date-picker-popup .day-cell:hover {
+    -fx-background-color: rgba(6, 255, 165, 0.25);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: #06ffa5;
+    -fx-border-width: 2;
+    -fx-cursor: hand;
+}
+
+/* Selected Day */
+.date-picker-popup .day-cell:selected,
+.date-picker-popup .day-cell.selected {
+    -fx-background-color: #06ffa5;
+    -fx-text-fill: #1a1a2e;
+    -fx-font-weight: bold;
+}
+
+/* Today's Date */
+.date-picker-popup .day-cell.today {
+    -fx-border-color: #457b9d;
+    -fx-border-width: 2;
     -fx-background-color: rgba(69, 123, 157, 0.3);
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
 }
 
-.date-picker-popup .selected {
-    -fx-background-color: #457b9d;
+/* Days from Other Months */
+.date-picker-popup .previous-month,
+.date-picker-popup .next-month {
+    -fx-text-fill: rgba(255, 255, 255, 0.3);
+    -fx-background-color: #1a1a2e;
 }
 
+.date-picker-popup .previous-month:hover,
+.date-picker-popup .next-month:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-text-fill: rgba(255, 255, 255, 0.5);
+}
+
+/* Disabled Days */
+.date-picker-popup .day-cell:disabled {
+    -fx-text-fill: rgba(255, 255, 255, 0.2);
+    -fx-background-color: #1a1a2e;
+}
+
+/* Focused Day */
+.date-picker-popup .day-cell:focused {
+    -fx-background-color: rgba(6, 255, 165, 0.2);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: #06ffa5;
+    -fx-border-width: 2;
+}
 /* ScrollPane Styles */
 .scroll-pane {
     -fx-background-color: transparent;
@@ -481,14 +627,14 @@
 }
 
 .progress-bar .bar {
-    -fx-background-color: linear-gradient(to right, #06ffa5, #20c997);
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 0%, #06ffa5 0%, #20c997 100%);
     -fx-background-radius: 5px;
     -fx-background-insets: 0;
     -fx-padding: 0;
 }
 
 .progress-bar:indeterminate .bar {
-    -fx-background-color: linear-gradient(to right, #457b9d, #1d3557);
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 0%, #457b9d 0%, #1d3557 100%);
 }
 
 /* Enhanced Table Styling */
@@ -512,12 +658,12 @@
 
 /* Welcome Screen Split Layout Styles */
 .welcome-left-side {
-    -fx-background-color: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #0f2027 0%, #203a43 50%, #2c5364 100%);
     -fx-padding: 50 50;
 }
 
 .welcome-right-side {
-    -fx-background-color: linear-gradient(135deg, #2f3548 0%, #3a4158 100%);
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #2f3548 0%, #3a4158 100%);
     -fx-padding: 50 50;
     -fx-alignment: center;
 }
@@ -567,7 +713,7 @@
 
 /* Primary CTA Button - Sign Up */
 .primary-cta-button {
-    -fx-background-color: linear-gradient(to right, #e91e63, #d81b60);
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 0%, #e91e63 0%, #d81b60 100%);
     -fx-text-fill: white;
     -fx-font-size: 18px;
     -fx-font-weight: bold;
@@ -579,7 +725,7 @@
 }
 
 .primary-cta-button:hover {
-    -fx-background-color: linear-gradient(to right, #f06292, #e91e63);
+    -fx-background-color: linear-gradient(from 0% 0% to 100% 0%, #f06292 0%, #e91e63 100%);
     -fx-scale-y: 1.03;
     -fx-scale-x: 1.03;
     -fx-effect: dropshadow(gaussian, rgba(233, 30, 99, 0.7), 25, 0, 0, 8);

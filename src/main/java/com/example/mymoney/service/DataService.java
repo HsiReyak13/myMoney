@@ -47,6 +47,9 @@ public class DataService {
             stmt.executeUpdate();
             stmt.close();
             
+            // Clear metrics cache so dashboard updates with new data
+            clearMetricsCache();
+            
         } catch (SQLException e) {
             System.err.println("❌ Failed to add transaction!");
             e.printStackTrace();
@@ -406,10 +409,7 @@ public class DataService {
         transactions.set(i, transactions.get(j));
         transactions.set(j, temp);
     }
-    
-    /**
-     * SEARCH ALGORITHMS - Efficient searching strategies
-     */
+
     
     public List<Transaction> binarySearchByAmount(List<Transaction> sortedTransactions, double targetAmount, double tolerance) {
         List<Transaction> results = new ArrayList<>();
@@ -512,10 +512,7 @@ public class DataService {
         return false;
     }
     
-    /**
-     * ADVANCED DATA STRUCTURES
-     */
-    
+
     public List<Transaction> getTopNTransactionsByAmount(List<Transaction> transactions, int n, boolean highest) {
         if (transactions == null || transactions.isEmpty()) {
             return new ArrayList<>();

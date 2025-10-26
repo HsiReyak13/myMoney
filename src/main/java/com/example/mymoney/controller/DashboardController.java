@@ -23,6 +23,7 @@ public class DashboardController {
     private final DataService dataService;
     private VBox dashboardContent;
     private Label balanceValue, incomeValue, expensesValue, savingsValue;
+    private Label balanceChange, incomeChange, expensesChange, savingsChange;
     private LineChart<Number, Number> trendChart;
 
     public DashboardController() {
@@ -57,20 +58,24 @@ public class DashboardController {
         grid.setAlignment(Pos.CENTER);
         grid.setMaxWidth(1400);
 
-        VBox balanceCard = createMetricCard("Total Balance", "$0.00", "+0%", "metric-positive");
+        VBox balanceCard = createMetricCard("Total Balance", "₱0.00", "+0%", "metric-positive");
         balanceValue = (Label) ((VBox) balanceCard.getChildren().get(1)).getChildren().get(0);
+        balanceChange = (Label) ((VBox) balanceCard.getChildren().get(1)).getChildren().get(1);
         grid.add(balanceCard, 0, 0);
 
-        VBox incomeCard = createMetricCard("Total Income", "$0.00", "+0%", "metric-positive");
+        VBox incomeCard = createMetricCard("Total Income", "₱0.00", "+0%", "metric-positive");
         incomeValue = (Label) ((VBox) incomeCard.getChildren().get(1)).getChildren().get(0);
+        incomeChange = (Label) ((VBox) incomeCard.getChildren().get(1)).getChildren().get(1);
         grid.add(incomeCard, 1, 0);
 
-        VBox expensesCard = createMetricCard("Total Expenses", "$0.00", "+0%", "metric-negative");
+        VBox expensesCard = createMetricCard("Total Expenses", "₱0.00", "+0%", "metric-negative");
         expensesValue = (Label) ((VBox) expensesCard.getChildren().get(1)).getChildren().get(0);
+        expensesChange = (Label) ((VBox) expensesCard.getChildren().get(1)).getChildren().get(1);
         grid.add(expensesCard, 2, 0);
 
         VBox savingsCard = createMetricCard("Savings Rate", "0%", "+0%", "metric-positive");
         savingsValue = (Label) ((VBox) savingsCard.getChildren().get(1)).getChildren().get(0);
+        savingsChange = (Label) ((VBox) savingsCard.getChildren().get(1)).getChildren().get(1);
         grid.add(savingsCard, 3, 0);
 
         for (int i = 0; i < 4; i++) {
@@ -158,9 +163,57 @@ public class DashboardController {
         expensesValue.setText(metrics.getFormattedExpenses());
         savingsValue.setText(metrics.getFormattedSavingsRate());
 
+        // Calculate month-over-month percentage changes
+        calculateAndUpdatePercentageChanges(userId);
+
         updateTrendChart(userId);
         
         showDSAInsights(userId);
+    }
+    
+    private void calculateAndUpdatePercentageChanges(String userId) {
+        Map<YearMonth, Double> monthlyIncome = dataService.getMonthlyIncome(userId);
+        Map<YearMonth, Double> monthlyExpenses = dataService.getMonthlyExpenses(userId);
+        
+        YearMonth currentMonth = YearMonth.now();
+        YearMonth previousMonth = currentMonth.minusMonths(1);
+        
+        // Income change
+        double currentIncome = monthlyIncome.getOrDefault(currentMonth, 0.0);
+        double previousIncome = monthlyIncome.getOrDefault(previousMonth, 0.0);
+        double incomeChangePercent = calculatePercentageChange(previousIncome, currentIncome);
+        incomeChange.setText(formatPercentageChange(incomeChangePercent));
+        
+        // Expenses change
+        double currentExpenses = monthlyExpenses.getOrDefault(currentMonth, 0.0);
+        double previousExpenses = monthlyExpenses.getOrDefault(previousMonth, 0.0);
+        double expensesChangePercent = calculatePercentageChange(previousExpenses, currentExpenses);
+        expensesChange.setText(formatPercentageChange(expensesChangePercent));
+        
+        // Balance change
+        double currentBalance = currentIncome - currentExpenses;
+        double previousBalance = previousIncome - previousExpenses;
+        double balanceChangePercent = calculatePercentageChange(previousBalance, currentBalance);
+        balanceChange.setText(formatPercentageChange(balanceChangePercent));
+        
+        // Savings rate change
+        double currentSavingsRate = currentIncome > 0 ? ((currentIncome - currentExpenses) / currentIncome) * 100 : 0;
+        double previousSavingsRate = previousIncome > 0 ? ((previousIncome - previousExpenses) / previousIncome) * 100 : 0;
+        double savingsRateChangePercent = currentSavingsRate - previousSavingsRate;
+        savingsChange.setText(formatPercentageChange(savingsRateChangePercent));
+    }
+    
+    private double calculatePercentageChange(double previous, double current) {
+        if (previous == 0) {
+            return current > 0 ? 100 : 0;
+        }
+        return ((current - previous) / Math.abs(previous)) * 100;
+    }
+    
+    private String formatPercentageChange(double percentChange) {
+        String sign = percentChange >= 0 ? "+" : "";
+        String color = percentChange >= 0 ? "#06ffa5" : "#ff6b6b";
+        return String.format("%s%.1f%%", sign, percentChange);
     }
     
     private void showDSAInsights(String userId) {

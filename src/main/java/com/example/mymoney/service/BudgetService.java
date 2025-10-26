@@ -105,10 +105,7 @@ public class BudgetService {
         }
     }
 
-    
-    /**
-     * Use Binary Search to find optimal budget allocation
-     */
+
     public Map<String, Double> findOptimalBudgetAllocation(String userId, double totalBudget) {
         com.example.mymoney.service.DataService dataService = com.example.mymoney.service.DataService.getInstance();
         List<Transaction> transactions = dataService.getTransactionsForUser(userId);

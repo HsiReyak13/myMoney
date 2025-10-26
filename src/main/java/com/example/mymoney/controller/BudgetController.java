@@ -85,7 +85,7 @@ public class BudgetController {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        totalSpentLabel = new Label("$0 / $0");
+        totalSpentLabel = new Label("₱0 / ₱0");
         totalSpentLabel.setStyle("-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;");
 
         spentHeader.getChildren().addAll(spentLabel, spacer, totalSpentLabel);
@@ -148,7 +148,7 @@ public class BudgetController {
 
         header.getChildren().addAll(categoryLabel, spacer1, percentLabel);
 
-        Label amountLabel = new Label(String.format("$%.0f / $%.0f", spent, budget));
+        Label amountLabel = new Label(String.format("₱%.0f / ₱%.0f", spent, budget));
         amountLabel.setStyle("-fx-text-fill: #a8dadc; -fx-font-size: 14px;");
 
         ProgressBar progressBar = new ProgressBar(budget > 0 ? Math.min(spent / budget, 1.0) : 0);
@@ -232,7 +232,7 @@ public class BudgetController {
         double totalSpent = dataService.getCurrentMonthTotalExpenses(userId);
 
         overallBudgetField.setText(String.format("%.0f", budget.getOverallMonthlyBudget()));
-        totalSpentLabel.setText(String.format("$%.0f / $%.0f", totalSpent, budget.getOverallMonthlyBudget()));
+        totalSpentLabel.setText(String.format("₱%.0f / ₱%.0f", totalSpent, budget.getOverallMonthlyBudget()));
         
         double overallPercent = budget.getOverallMonthlyBudget() > 0 
             ? (totalSpent / budget.getOverallMonthlyBudget()) 

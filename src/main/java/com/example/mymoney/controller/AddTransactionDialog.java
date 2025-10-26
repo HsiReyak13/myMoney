@@ -77,9 +77,19 @@ public class AddTransactionDialog {
         dateLabel.getStyleClass().add("field-label");
         dateLabel.setStyle("-fx-text-fill: white; -fx-font-size: 13px;");
         DatePicker datePicker = new DatePicker(LocalDate.now());
-        datePicker.getStyleClass().add("date-picker");
+        datePicker.getStyleClass().addAll("date-picker", "enhanced-date-picker");
         datePicker.setMaxWidth(Double.MAX_VALUE);
         datePicker.setPrefHeight(40);
+        datePicker.setStyle(
+            "-fx-background-color: rgba(50, 50, 70, 0.6);" +
+            "-fx-background-radius: 8;" +
+            "-fx-border-color: rgba(255, 255, 255, 0.2);" +
+            "-fx-border-width: 1;" +
+            "-fx-border-radius: 8;" +
+            "-fx-text-fill: white;" +
+            "-fx-font-size: 14px;" +
+            "-fx-padding: 12 15;"
+        );
 
         Label categoryLabel = new Label("Category");
         categoryLabel.getStyleClass().add("field-label");
